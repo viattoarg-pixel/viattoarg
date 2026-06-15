@@ -20,7 +20,7 @@ const Landing = () => {
         <div className="mx-auto flex h-[56px] max-w-[1200px] items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
             <StackedLogo size={16} />
-            <span className="text-[14px] font-bold tracking-[0.08em] uppercase">Viáticos</span>
+            <span className="text-[14px] font-bold tracking-[0.08em] uppercase">iatto</span>
           </Link>
           <div className="flex items-center gap-3">
             <button
@@ -95,7 +95,7 @@ const Landing = () => {
             Es frágil, se pierde información y el riesgo de pasarte del presupuesto es alto.
           </p>
           <p className="text-[14px] text-muted-foreground leading-relaxed">
-            <span className="text-foreground font-medium">Viáticos</span> centraliza todo: el tope,
+            <span className="text-foreground font-medium">iatto</span> centraliza todo: el tope,
             cada gasto, las categorías y los comprobantes adjuntos. Y te muestra el saldo en tiempo real
             para que nunca te quedes corto.
           </p>
@@ -106,7 +106,7 @@ const Landing = () => {
         <div className="mx-auto max-w-[1200px] flex items-center justify-between text-[12px] text-muted-foreground">
           <div className="flex items-center gap-2">
             <StackedLogo size={14} />
-            <span>Viáticos © {new Date().getFullYear()}</span>
+            <span>iatto © {new Date().getFullYear()}</span>
           </div>
           <Link to="/auth" className="hover:text-foreground">Ingresar</Link>
         </div>
