@@ -62,32 +62,32 @@
   }
 
   .dark {
-    --background: 80 10% 7%;
-    --foreground: 60 20% 90%;
+    --background: 100 12% 8%;
+    --foreground: 48 18% 92%;
 
-    --card: 80 10% 10%;
-    --card-foreground: 60 20% 90%;
+    --card: 100 10% 11%;
+    --card-foreground: 48 18% 92%;
 
-    --popover: 80 10% 10%;
-    --popover-foreground: 60 20% 90%;
+    --popover: 100 10% 11%;
+    --popover-foreground: 48 18% 92%;
 
-    --primary: 75 60% 55%;
-    --primary-foreground: 80 15% 8%;
+    --primary: 96 45% 55%;
+    --primary-foreground: 100 20% 8%;
 
-    --secondary: 80 8% 16%;
-    --secondary-foreground: 60 20% 90%;
+    --secondary: 100 8% 16%;
+    --secondary-foreground: 48 18% 92%;
 
-    --muted: 80 8% 16%;
-    --muted-foreground: 60 10% 55%;
+    --muted: 100 8% 16%;
+    --muted-foreground: 48 10% 55%;
 
-    --accent: 75 60% 50%;
-    --accent-foreground: 80 15% 8%;
+    --accent: 92 50% 60%;
+    --accent-foreground: 100 20% 8%;
 
     --destructive: 12 80% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 110 65% 55%;
-    --success-foreground: 80 15% 8%;
+    --success: 110 50% 55%;
+    --success-foreground: 100 20% 8%;
 
     --warning: 38 100% 55%;
     --warning-foreground: 0 0% 100%;
@@ -95,23 +95,23 @@
     --info: 199 80% 55%;
     --info-foreground: 0 0% 100%;
 
-    --border: 80 8% 22%;
-    --input: 80 8% 22%;
-    --ring: 75 60% 55%;
+    --border: 100 8% 22%;
+    --input: 100 8% 22%;
+    --ring: 96 45% 55%;
 
-    --sidebar-background: 80 10% 6%;
-    --sidebar-foreground: 60 10% 60%;
-    --sidebar-primary: 75 60% 55%;
-    --sidebar-primary-foreground: 80 15% 8%;
-    --sidebar-accent: 80 8% 12%;
-    --sidebar-accent-foreground: 60 20% 88%;
-    --sidebar-border: 80 8% 22%;
-    --sidebar-ring: 75 60% 55%;
+    --sidebar-background: 100 10% 6%;
+    --sidebar-foreground: 48 10% 60%;
+    --sidebar-primary: 96 45% 55%;
+    --sidebar-primary-foreground: 100 20% 8%;
+    --sidebar-accent: 100 8% 12%;
+    --sidebar-accent-foreground: 48 18% 88%;
+    --sidebar-border: 100 8% 22%;
+    --sidebar-ring: 96 45% 55%;
 
     --severity-critical: 12 80% 55%;
     --severity-high: 25 90% 58%;
     --severity-medium: 38 100% 55%;
-    --severity-low: 110 65% 55%;
+    --severity-low: 110 50% 55%;
   }
 }
 
