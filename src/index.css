@@ -121,11 +121,11 @@
   }
 
   html {
-    background-color: hsl(0 0% 100%);
+    background-color: hsl(48 18% 93%);
   }
 
   html.dark {
-    background-color: hsl(240 6% 4%);
+    background-color: hsl(100 12% 8%);
   }
 
   body {
