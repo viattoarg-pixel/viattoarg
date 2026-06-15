@@ -20,7 +20,7 @@ const Landing = () => {
         <div className="mx-auto flex h-[56px] max-w-[1200px] items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
             <StackedLogo size={16} />
-            <span className="text-[14px] font-bold tracking-[0.08em] uppercase">iatto</span>
+            <span className="text-[18px] font-semibold lowercase tracking-tight text-foreground">iatto</span>
           </Link>
           <div className="flex items-center gap-3">
             <button
