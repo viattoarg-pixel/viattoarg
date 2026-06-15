@@ -108,19 +108,19 @@ export default function Expenses() {
           {!active ? (
             <NoBudget />
           ) : (
-            <div className="relative overflow-hidden rounded-2xl bg-[hsl(95_22%_28%)] text-white p-5 md:p-6 shadow-lg">
-              <div className="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+            <div className="relative overflow-hidden rounded-2xl bg-white text-black border border-black/10 p-5 md:p-6 shadow-sm">
+              <div className="absolute -right-8 -bottom-8 opacity-[0.06] pointer-events-none">
                 <svg width="240" height="240" viewBox="0 0 100 100" fill="none">
                   <path d="M20 20 L50 80 L80 20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <div className="relative">
-                <div className="text-[11px] tracking-widest uppercase text-white/70 font-medium">Tope máximo disponible</div>
+                <div className="text-[11px] tracking-widest uppercase text-black/60 font-medium">Tope máximo disponible</div>
                 <div className="flex items-center gap-3 mt-1.5">
-                  <div className="text-3xl md:text-4xl font-bold tabular-nums">{formatCurrency(max, currency)}</div>
+                  <div className="text-3xl md:text-4xl font-bold tabular-nums text-black">{formatCurrency(max, currency)}</div>
                   <Dialog open={editTopeOpen} onOpenChange={setEditTopeOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" variant="ghost" className="h-7 text-[12px] gap-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full px-3">
+                      <Button size="sm" variant="ghost" className="h-7 text-[12px] gap-1.5 bg-black/5 hover:bg-black/10 text-black rounded-full px-3">
                         <Pencil className="h-3 w-3" /> Editar tope
                       </Button>
                     </DialogTrigger>
@@ -129,27 +129,28 @@ export default function Expenses() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
-                  <div className="rounded-xl bg-black/15 border border-white/10 p-3.5">
-                    <div className="text-[10px] tracking-widest uppercase text-white/70 font-medium">Monto gastado</div>
-                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1">{formatCurrency(spent, currency)}</div>
+                  <div className="rounded-xl bg-white border border-black/15 p-3.5">
+                    <div className="text-[10px] tracking-widest uppercase text-black/60 font-medium">Monto gastado</div>
+                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1 text-black">{formatCurrency(spent, currency)}</div>
                   </div>
-                  <div className="rounded-xl bg-white text-[hsl(95_25%_20%)] p-3.5 shadow-sm">
-                    <div className="text-[10px] tracking-widest uppercase text-foreground/60 font-medium">Saldo disponible</div>
-                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1">{formatCurrency(remaining, currency)}</div>
+                  <div className="rounded-xl bg-white border border-black/15 p-3.5">
+                    <div className="text-[10px] tracking-widest uppercase text-black/60 font-medium">Saldo disponible</div>
+                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1 text-black">{formatCurrency(remaining, currency)}</div>
                   </div>
                 </div>
 
                 <div className="mt-5">
                   <div className="flex items-center justify-between text-[11px] mb-1.5">
-                    <span className="text-white/80">Consumo del presupuesto</span>
-                    <span className="text-white/90 tabular-nums">{pct.toFixed(1)}%</span>
+                    <span className="text-black/70">Consumo del presupuesto</span>
+                    <span className="text-black tabular-nums">{pct.toFixed(1)}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-white/15 overflow-hidden">
-                    <div className="h-full bg-[hsl(85_45%_70%)] transition-all" style={{ width: `${pct}%` }} />
+                  <div className="h-1.5 rounded-full bg-black/10 overflow-hidden">
+                    <div className="h-full bg-black transition-all" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               </div>
             </div>
+
           )}
 
           {/* Toolbar */}
