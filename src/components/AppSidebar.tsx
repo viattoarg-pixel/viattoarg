@@ -1,7 +1,6 @@
-import { LayoutDashboard, Plus, Bug, BarChart3, Settings, LogOut, Search } from "lucide-react";
+import { LayoutDashboard, Wallet, Receipt, Plus, Tags, Settings, LogOut } from "lucide-react";
 import { StackedLogo } from "./StackedLogo";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -9,11 +8,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 export const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Plus, label: "Report Bug", path: "/bugs/new" },
-  { icon: Bug, label: "All Bugs", path: "/bugs" },
-  { icon: BarChart3, label: "Analytics", path: "/analytics" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: LayoutDashboard, label: "Resumen", path: "/dashboard" },
+  { icon: Plus, label: "Nuevo gasto", path: "/expenses/new" },
+  { icon: Receipt, label: "Gastos", path: "/expenses" },
+  { icon: Wallet, label: "Presupuestos", path: "/budgets" },
+  { icon: Tags, label: "Categorías", path: "/categories" },
+  { icon: Settings, label: "Ajustes", path: "/settings" },
 ];
 
 export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
@@ -26,21 +26,19 @@ export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: 
 
   return (
     <>
-      {/* Workspace header */}
       <div className="flex items-center gap-2 px-3 h-11 border-b border-sidebar-border">
         <StackedLogo size={16} color="currentColor" />
         {!collapsed && (
           <span className="font-bold uppercase tracking-[0.08em] text-[14px] text-sidebar-accent-foreground">
-            Triage
+            Viáticos
           </span>
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 py-1.5 px-1.5 space-y-px">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-            (item.path !== "/" && location.pathname.startsWith(item.path));
+          const isActive = location.pathname === item.path ||
+            (item.path !== "/" && item.path !== "/expenses/new" && location.pathname.startsWith(item.path));
           return (
             <Link
               key={item.path}
@@ -60,7 +58,6 @@ export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: 
         })}
       </nav>
 
-      {/* Footer */}
       <div className="border-t border-sidebar-border p-2">
         <div className="flex items-center gap-2 px-1">
           <Avatar className="h-5 w-5">
@@ -70,7 +67,7 @@ export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: 
           </Avatar>
           {!collapsed && (
             <span className="text-[12px] text-sidebar-foreground truncate flex-1">
-              {profile?.full_name || "User"}
+              {profile?.full_name || "Usuario"}
             </span>
           )}
           {!collapsed && (

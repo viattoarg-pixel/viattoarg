@@ -13,7 +13,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header */}
         <header className="sticky top-0 z-40 flex md:hidden items-center justify-between h-11 border-b border-border bg-background px-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -29,7 +28,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </Sheet>
           <div className="flex items-center gap-1.5">
             <StackedLogo size={16} />
-            <span className="font-bold uppercase tracking-[0.08em] text-[14px] text-foreground">Triage</span>
+            <span className="font-bold uppercase tracking-[0.08em] text-[14px] text-foreground">Viáticos</span>
           </div>
           <div className="w-7" />
         </header>
