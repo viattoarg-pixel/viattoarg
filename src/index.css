@@ -62,56 +62,56 @@
   }
 
   .dark {
-    --background: 100 12% 8%;
-    --foreground: 48 18% 92%;
+    --background: 100 10% 20%;
+    --foreground: 48 25% 96%;
 
-    --card: 100 10% 11%;
-    --card-foreground: 48 18% 92%;
+    --card: 100 8% 26%;
+    --card-foreground: 48 25% 96%;
 
-    --popover: 100 10% 11%;
-    --popover-foreground: 48 18% 92%;
+    --popover: 100 8% 26%;
+    --popover-foreground: 48 25% 96%;
 
-    --primary: 96 45% 55%;
-    --primary-foreground: 100 20% 8%;
+    --primary: 96 50% 62%;
+    --primary-foreground: 100 25% 12%;
 
-    --secondary: 100 8% 16%;
-    --secondary-foreground: 48 18% 92%;
+    --secondary: 100 7% 32%;
+    --secondary-foreground: 48 25% 96%;
 
-    --muted: 100 8% 16%;
-    --muted-foreground: 48 10% 55%;
+    --muted: 100 7% 32%;
+    --muted-foreground: 48 18% 82%;
 
-    --accent: 92 50% 60%;
-    --accent-foreground: 100 20% 8%;
+    --accent: 92 55% 68%;
+    --accent-foreground: 100 25% 12%;
 
-    --destructive: 12 80% 55%;
+    --destructive: 12 80% 62%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 110 50% 55%;
-    --success-foreground: 100 20% 8%;
+    --success: 110 55% 62%;
+    --success-foreground: 100 25% 12%;
 
-    --warning: 38 100% 55%;
+    --warning: 38 100% 62%;
     --warning-foreground: 0 0% 100%;
 
-    --info: 199 80% 55%;
+    --info: 199 80% 62%;
     --info-foreground: 0 0% 100%;
 
-    --border: 100 8% 22%;
-    --input: 100 8% 22%;
-    --ring: 96 45% 55%;
+    --border: 100 7% 40%;
+    --input: 100 7% 40%;
+    --ring: 96 50% 62%;
 
-    --sidebar-background: 100 10% 6%;
-    --sidebar-foreground: 48 10% 60%;
-    --sidebar-primary: 96 45% 55%;
-    --sidebar-primary-foreground: 100 20% 8%;
-    --sidebar-accent: 100 8% 12%;
-    --sidebar-accent-foreground: 48 18% 88%;
-    --sidebar-border: 100 8% 22%;
-    --sidebar-ring: 96 45% 55%;
+    --sidebar-background: 100 9% 16%;
+    --sidebar-foreground: 48 18% 88%;
+    --sidebar-primary: 96 50% 62%;
+    --sidebar-primary-foreground: 100 25% 12%;
+    --sidebar-accent: 100 7% 28%;
+    --sidebar-accent-foreground: 48 25% 96%;
+    --sidebar-border: 100 7% 36%;
+    --sidebar-ring: 96 50% 62%;
 
-    --severity-critical: 12 80% 55%;
-    --severity-high: 25 90% 58%;
-    --severity-medium: 38 100% 55%;
-    --severity-low: 110 50% 55%;
+    --severity-critical: 12 80% 62%;
+    --severity-high: 25 90% 65%;
+    --severity-medium: 38 100% 62%;
+    --severity-low: 110 55% 62%;
   }
 }
 
@@ -125,7 +125,7 @@
   }
 
   html.dark {
-    background-color: hsl(100 12% 8%);
+    background-color: hsl(100 10% 20%);
   }
 
   body {
