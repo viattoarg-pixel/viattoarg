@@ -36,9 +36,9 @@ export default function Auth() {
     setIsGoogleLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-      if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+      if (error) toast({ title: "Falló el inicio con Google", description: error.message, variant: "destructive" });
     } catch (error: any) {
-      toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+      toast({ title: "Falló el inicio con Google", description: error.message, variant: "destructive" });
     } finally {
       setIsGoogleLoading(false);
     }
@@ -81,9 +81,9 @@ export default function Auth() {
         <div className="flex flex-col items-start gap-3">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <StackedLogo size={16} />
-            <span className="text-[14px] font-bold text-foreground tracking-[0.08em] uppercase">Triage</span>
+            <span className="text-[14px] font-bold text-foreground tracking-[0.08em] uppercase">Viáticos</span>
           </Link>
-          <p className="text-[13px] text-muted-foreground">Track, prioritize, and resolve bugs</p>
+          <p className="text-[13px] text-muted-foreground">Controlá tus viáticos en un solo lugar</p>
         </div>
 
         {/* Google */}
@@ -103,7 +103,7 @@ export default function Auth() {
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
             </svg>
           )}
-          Continue with Google
+          Continuar con Google
         </Button>
 
         <div className="relative">
@@ -111,15 +111,15 @@ export default function Auth() {
             <span className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-[11px] uppercase">
-            <span className="bg-background px-2 text-muted-foreground">or</span>
+            <span className="bg-background px-2 text-muted-foreground">o</span>
           </div>
         </div>
 
         {/* Email auth */}
         <Tabs defaultValue="login">
           <TabsList className="grid w-full grid-cols-2 h-9 p-0.5">
-            <TabsTrigger value="login" className="text-[12px]">Sign in</TabsTrigger>
-            <TabsTrigger value="signup" className="text-[12px]">Sign up</TabsTrigger>
+            <TabsTrigger value="login" className="text-[12px]">Ingresar</TabsTrigger>
+            <TabsTrigger value="signup" className="text-[12px]">Crear cuenta</TabsTrigger>
           </TabsList>
 
           <TabsContent value="login" className="mt-4">
@@ -129,7 +129,7 @@ export default function Auth() {
                 <Input type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required className="h-8 text-[13px]" />
               </div>
               <div className="space-y-1">
-                <Label className="text-[12px]">Password</Label>
+                <Label className="text-[12px]">Contraseña</Label>
                 <Input type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required className="h-8 text-[13px]" />
               </div>
               <Button type="submit" className="w-full h-8 text-[13px]" disabled={isSubmitting}>
@@ -142,7 +142,7 @@ export default function Auth() {
           <TabsContent value="signup" className="mt-4">
             <form onSubmit={handleSignup} className="space-y-3">
               <div className="space-y-1">
-                <Label className="text-[12px]">Full Name</Label>
+                <Label className="text-[12px]">Nombre completo</Label>
                 <Input type="text" placeholder="Jane Doe" value={signupName} onChange={(e) => setSignupName(e.target.value)} required className="h-8 text-[13px]" />
               </div>
               <div className="space-y-1">
@@ -150,8 +150,8 @@ export default function Auth() {
                 <Input type="email" placeholder="you@example.com" value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} required className="h-8 text-[13px]" />
               </div>
               <div className="space-y-1">
-                <Label className="text-[12px]">Password</Label>
-                <Input type="password" placeholder="Min 6 characters" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required minLength={6} className="h-8 text-[13px]" />
+                <Label className="text-[12px]">Contraseña</Label>
+                <Input type="password" placeholder="Mínimo 6 caracteres" value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} required minLength={6} className="h-8 text-[13px]" />
               </div>
               <Button type="submit" className="w-full h-8 text-[13px]" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
