@@ -81,7 +81,7 @@ export default function Auth() {
         <div className="flex flex-col items-start gap-3">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <StackedLogo size={16} />
-            <span className="text-[14px] font-bold text-foreground tracking-[0.08em] uppercase">viatto</span>
+            <span className="text-[18px] font-semibold lowercase tracking-tight text-foreground">viatto</span>
           </Link>
           <p className="text-[13px] text-muted-foreground">Controlá tus viáticos en un solo lugar</p>
         </div>
