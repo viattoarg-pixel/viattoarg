@@ -126,8 +126,9 @@
   }
 
   html.dark {
-    background-color: hsl(96 22% 42%);
+    background-color: hsl(0 0% 100%);
   }
+
 
   body {
     @apply bg-background text-foreground antialiased;
