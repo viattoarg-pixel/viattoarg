@@ -1,126 +1,314 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { CategoryBadge } from "@/components/CategoryBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useBudgets, useActiveBudget } from "@/hooks/useBudgets";
-import { useExpenses } from "@/hooks/useExpenses";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { useActiveBudget, useUpdateBudget, useCreateBudget } from "@/hooks/useBudgets";
+import { useExpenses, useDeleteExpense } from "@/hooks/useExpenses";
 import { useCategories } from "@/hooks/useCategories";
+import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { Plus, Search, Paperclip, Loader2 } from "lucide-react";
+import { downloadExpensePdf, downloadExpensesReportPdf } from "@/lib/pdf";
+import { toast } from "sonner";
+import {
+  Plus, Search, Pencil, Trash2, Image as ImageIcon, Download, Calendar, Utensils, Loader2,
+} from "lucide-react";
 
 export default function Expenses() {
-  const { data: budgets } = useBudgets();
   const active = useActiveBudget();
-  const [budgetId, setBudgetId] = useState<string>("active");
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-
-  const effectiveBudgetId = budgetId === "all" ? undefined : budgetId === "active" ? active?.id : budgetId;
-  const { data: expenses, isLoading } = useExpenses(effectiveBudgetId);
+  const { data: expenses, isLoading } = useExpenses(active?.id);
   const { data: categories } = useCategories();
+  const del = useDeleteExpense();
   const categoryMap = useMemo(() => new Map((categories ?? []).map(c => [c.id, c])), [categories]);
-  const budgetMap = useMemo(() => new Map((budgets ?? []).map(b => [b.id, b])), [budgets]);
+
+  const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const [editTopeOpen, setEditTopeOpen] = useState(false);
 
   const filtered = (expenses ?? []).filter(e => {
     const matchSearch = !search ||
       e.description.toLowerCase().includes(search.toLowerCase()) ||
       String(e.amount).includes(search);
-    const matchCat = categoryFilter === "all" ||
-      (categoryFilter === "none" ? !e.category_id : e.category_id === categoryFilter);
-    return matchSearch && matchCat;
+    const matchDate = !dateFilter || e.expense_date === dateFilter;
+    return matchSearch && matchDate;
   });
 
-  const total = filtered.reduce((s, e) => s + Number(e.amount), 0);
-  const currency = effectiveBudgetId ? budgetMap.get(effectiveBudgetId)?.currency ?? "ARS" : "ARS";
+  const spent = (expenses ?? []).reduce((s, e) => s + Number(e.amount), 0);
+  const max = Number(active?.max_amount ?? 0);
+  const remaining = Math.max(max - spent, 0);
+  const pct = max > 0 ? Math.min((spent / max) * 100, 100) : 0;
+  const currency = active?.currency ?? "ARS";
+
+  const handleDownloadOne = async (e: any) => {
+    const catName = e.category_id ? categoryMap.get(e.category_id)?.name : null;
+    toast.promise(
+      downloadExpensePdf({
+        id: e.id,
+        description: e.description,
+        amount: Number(e.amount),
+        expense_date: e.expense_date,
+        receipt_url: e.receipt_url,
+        category_name: catName,
+      }, currency),
+      { loading: "Generando PDF...", success: "PDF descargado", error: "Error al generar PDF" }
+    );
+  };
+
+  const handleDownloadAll = async () => {
+    toast.promise(
+      downloadExpensesReportPdf({
+        budget: active ? { name: active.name, max_amount: max, currency } : null,
+        spent,
+        remaining,
+        currency,
+        expenses: filtered.map(e => ({
+          id: e.id,
+          description: e.description,
+          amount: Number(e.amount),
+          expense_date: e.expense_date,
+          receipt_url: e.receipt_url,
+          category_name: e.category_id ? categoryMap.get(e.category_id)?.name ?? null : null,
+        })),
+      }),
+      { loading: "Generando PDF...", success: "PDF descargado", error: "Error al generar PDF" }
+    );
+  };
+
+  const viewReceipt = async (path: string) => {
+    const { data } = await supabase.storage.from("receipts").createSignedUrl(path, 600);
+    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+  };
 
   return (
     <AppLayout>
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-4 md:px-6 h-11 border-b border-border shrink-0">
           <h1 className="text-[13px] font-medium">Gastos</h1>
-          <Button asChild size="sm" className="h-7 text-[12px] gap-1.5">
-            <Link to="/expenses/new"><Plus className="h-3.5 w-3.5" /> Nuevo gasto</Link>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-[12px] gap-1.5"
+            onClick={handleDownloadAll}
+            disabled={!active || filtered.length === 0}
+          >
+            <Download className="h-3.5 w-3.5" /> Descargar PDF
           </Button>
         </div>
 
-        <div className="p-4 md:p-6 space-y-4 max-w-[1200px] w-full">
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input placeholder="Buscar gasto..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 text-[13px]" />
+        <div className="flex-1 overflow-auto p-4 md:p-6 space-y-5 max-w-[1200px] w-full">
+          {/* Budget hero card */}
+          {!active ? (
+            <NoBudget />
+          ) : (
+            <div className="relative overflow-hidden rounded-2xl bg-[hsl(95_22%_28%)] text-white p-5 md:p-6 shadow-lg">
+              <div className="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+                <svg width="240" height="240" viewBox="0 0 100 100" fill="none">
+                  <path d="M20 20 L50 80 L80 20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="relative">
+                <div className="text-[11px] tracking-widest uppercase text-white/70 font-medium">Tope máximo disponible</div>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <div className="text-3xl md:text-4xl font-bold tabular-nums">{formatCurrency(max, currency)}</div>
+                  <Dialog open={editTopeOpen} onOpenChange={setEditTopeOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-7 text-[12px] gap-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full px-3">
+                        <Pencil className="h-3 w-3" /> Editar tope
+                      </Button>
+                    </DialogTrigger>
+                    <EditTopeDialog onClose={() => setEditTopeOpen(false)} />
+                  </Dialog>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
+                  <div className="rounded-xl bg-black/15 border border-white/10 p-3.5">
+                    <div className="text-[10px] tracking-widest uppercase text-white/70 font-medium">Monto gastado</div>
+                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1">{formatCurrency(spent, currency)}</div>
+                  </div>
+                  <div className="rounded-xl bg-white text-[hsl(95_25%_20%)] p-3.5 shadow-sm">
+                    <div className="text-[10px] tracking-widest uppercase text-foreground/60 font-medium">Saldo disponible</div>
+                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1">{formatCurrency(remaining, currency)}</div>
+                  </div>
+                </div>
+
+                <div className="mt-5">
+                  <div className="flex items-center justify-between text-[11px] mb-1.5">
+                    <span className="text-white/80">Consumo del presupuesto</span>
+                    <span className="text-white/90 tabular-nums">{pct.toFixed(1)}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-white/15 overflow-hidden">
+                    <div className="h-full bg-[hsl(85_45%_70%)] transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              </div>
             </div>
-            <Select value={budgetId} onValueChange={setBudgetId}>
-              <SelectTrigger className="h-8 text-[12px] w-[180px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Presupuesto activo</SelectItem>
-                <SelectItem value="all">Todos los presupuestos</SelectItem>
-                {(budgets ?? []).map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="h-8 text-[12px] w-[160px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las categorías</SelectItem>
-                <SelectItem value="none">Sin categoría</SelectItem>
-                {(categories ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+          )}
+
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild className="h-9 text-[13px] gap-1.5 rounded-full px-4 bg-foreground text-background hover:bg-foreground/90">
+              <Link to="/expenses/new"><Plus className="h-4 w-4" /> Nuevo gasto</Link>
+            </Button>
+            <div className="relative flex-1 min-w-[200px] max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Buscar gasto..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-9 h-9 text-[13px] rounded-full"
+              />
+            </div>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+              <Input
+                type="date"
+                value={dateFilter}
+                onChange={e => setDateFilter(e.target.value)}
+                className="pl-9 h-9 text-[13px] rounded-full w-[180px]"
+              />
+            </div>
             <div className="ml-auto text-[12px] text-muted-foreground">
-              Total: <span className="font-medium text-foreground tabular-nums">{formatCurrency(total, currency)}</span>
+              {filtered.length} de {expenses?.length ?? 0}
             </div>
           </div>
 
-          {/* Table */}
-          <div className="border border-border rounded-md overflow-hidden">
-            <table className="w-full text-[13px]">
-              <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left font-medium text-muted-foreground px-3 py-2">Fecha</th>
-                  <th className="text-left font-medium text-muted-foreground px-3 py-2">Descripción</th>
-                  <th className="text-left font-medium text-muted-foreground px-3 py-2">Categoría</th>
-                  <th className="text-right font-medium text-muted-foreground px-3 py-2">Monto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr><td colSpan={4} className="text-center py-12"><Loader2 className="h-4 w-4 mx-auto animate-spin text-muted-foreground" /></td></tr>
-                ) : filtered.length === 0 ? (
-                  <tr><td colSpan={4} className="text-center py-8 text-muted-foreground text-[13px]">No hay gastos para mostrar</td></tr>
-                ) : (
-                  filtered.map(e => {
-                    const bCurrency = budgetMap.get(e.budget_id)?.currency ?? "ARS";
-                    return (
-                      <tr key={e.id} className="border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors">
-                        <td className="px-3 py-2 text-muted-foreground text-[12px] whitespace-nowrap">
-                          <Link to={`/expenses/${e.id}`} className="block">{formatDate(e.expense_date)}</Link>
-                        </td>
-                        <td className="px-3 py-2">
-                          <Link to={`/expenses/${e.id}`} className="flex items-center gap-2">
-                            <span className="font-medium">{e.description || <span className="text-muted-foreground italic">Sin descripción</span>}</span>
-                            {e.receipt_url && <Paperclip className="h-3 w-3 text-muted-foreground" />}
-                          </Link>
-                        </td>
-                        <td className="px-3 py-2">
-                          <Link to={`/expenses/${e.id}`} className="block">
-                            <CategoryBadge category={e.category_id ? categoryMap.get(e.category_id) : null} />
-                          </Link>
-                        </td>
-                        <td className="px-3 py-2 text-right font-medium tabular-nums whitespace-nowrap">
-                          <Link to={`/expenses/${e.id}`} className="block">{formatCurrency(Number(e.amount), bCurrency)}</Link>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+          {/* List */}
+          <div className="space-y-2">
+            {isLoading ? (
+              <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+            ) : filtered.length === 0 ? (
+              <div className="border border-dashed border-border rounded-xl p-10 text-center">
+                <p className="text-[13px] text-muted-foreground">No hay gastos para mostrar</p>
+              </div>
+            ) : (
+              filtered.map(e => {
+                const cat = e.category_id ? categoryMap.get(e.category_id) : null;
+                return (
+                  <div key={e.id} className="bg-card border border-border rounded-2xl px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <Utensils className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[14px] font-semibold truncate">{e.description || "Sin nombre"}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">
+                        {cat?.name ?? "Sin categoría"} · {formatDate(e.expense_date)}
+                      </div>
+                    </div>
+                    <div className="text-[14px] font-bold tabular-nums whitespace-nowrap">{formatCurrency(Number(e.amount), currency)}</div>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      {e.receipt_url && (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => viewReceipt(e.receipt_url!)} title="Ver comprobante">
+                          <ImageIcon className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => handleDownloadOne(e)} title="Descargar PDF">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                        <Link to={`/expenses/${e.id}`} title="Editar"><Pencil className="h-4 w-4" /></Link>
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/80 hover:text-destructive" title="Eliminar">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Eliminar gasto?</AlertDialogTitle>
+                            <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => del.mutate(
+                                { id: e.id, receipt_url: e.receipt_url },
+                                { onSuccess: () => toast.success("Gasto eliminado"), onError: (err) => toast.error(err.message) },
+                              )}
+                            >Eliminar</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
     </AppLayout>
+  );
+}
+
+function EditTopeDialog({ onClose }: { onClose: () => void }) {
+  const active = useActiveBudget();
+  const update = useUpdateBudget();
+  const create = useCreateBudget();
+  const [amount, setAmount] = useState(active?.max_amount?.toString() ?? "");
+  const [name, setName] = useState(active?.name ?? "Mi presupuesto");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const max = Number(amount);
+    if (!Number.isFinite(max) || max < 0) {
+      toast.error("Ingresá un monto válido");
+      return;
+    }
+    try {
+      if (active) {
+        await update.mutateAsync({ id: active.id, max_amount: max, name: name.trim() || active.name });
+        toast.success("Tope actualizado");
+      } else {
+        await create.mutateAsync({ name: name.trim() || "Mi presupuesto", max_amount: max, currency: "ARS", is_active: true });
+        toast.success("Presupuesto creado");
+      }
+      onClose();
+    } catch (err: any) {
+      toast.error(err.message ?? "Error");
+    }
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>{active ? "Editar tope" : "Crear presupuesto"}</DialogTitle>
+      </DialogHeader>
+      <form onSubmit={submit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="bname">Nombre</Label>
+          <Input id="bname" value={name} onChange={e => setName(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="bmax">Tope máximo ({active?.currency ?? "ARS"})</Label>
+          <Input id="bmax" type="number" inputMode="decimal" step="0.01" min="0" value={amount} onChange={e => setAmount(e.target.value)} autoFocus required />
+        </div>
+        <DialogFooter>
+          <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" disabled={update.isPending || create.isPending}>
+            {(update.isPending || create.isPending) && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+            Guardar
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  );
+}
+
+function NoBudget() {
+  return (
+    <div className="border border-dashed border-border rounded-2xl p-8 text-center">
+      <p className="text-[14px] font-medium">Aún no tenés un presupuesto activo</p>
+      <p className="text-[12px] text-muted-foreground mt-1">Creá uno desde Presupuestos para empezar a controlar tus viáticos.</p>
+      <Button asChild className="mt-4 h-8 text-[12px]"><Link to="/budgets">Ir a Presupuestos</Link></Button>
+    </div>
   );
 }
