@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from "@/components/ui/select";
+import { CATEGORY_GROUPS, findGroupForItem } from "@/lib/categories";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -34,7 +35,8 @@ export default function ExpenseForm() {
   const cameraRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
-  const [categoryId, setCategoryId] = useState<string>("none");
+  // Stores the selected subcategory label (string), e.g. "Taxi".
+  const [categoryLabel, setCategoryLabel] = useState<string>("none");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [description, setDescription] = useState("");
@@ -46,16 +48,17 @@ export default function ExpenseForm() {
 
   useEffect(() => {
     if (existing) {
-      setCategoryId(existing.category_id ?? "none");
+      // Resolve existing category_id -> stored category name (label)
+      const cat = (categories ?? []).find(c => c.id === existing.category_id);
+      setCategoryLabel(cat?.name ?? "none");
       setAmount(String(existing.amount));
       setDate(existing.expense_date);
-      // description stores "Name\n\nNotes" or just name
       const parts = (existing.description ?? "").split("\n\n");
       setName(parts[0] ?? "");
       setDescription(parts.slice(1).join("\n\n"));
       setExistingReceipt(existing.receipt_url ?? null);
     }
-  }, [existing]);
+  }, [existing, categories]);
 
   useEffect(() => {
     if (existingReceipt && !removeReceipt) {
@@ -104,9 +107,32 @@ export default function ExpenseForm() {
 
       const fullDesc = description.trim() ? `${name.trim()}\n\n${description.trim()}` : name.trim();
 
+      // Resolve category: find existing row by name for this user, or create one.
+      let categoryId: string | null = null;
+      if (categoryLabel && categoryLabel !== "none") {
+        const existingCat = (categories ?? []).find(c => c.name === categoryLabel);
+        if (existingCat) {
+          categoryId = existingCat.id;
+        } else {
+          const group = findGroupForItem(categoryLabel);
+          const { data: created, error: catErr } = await supabase
+            .from("expense_categories")
+            .insert({
+              user_id: user.id,
+              name: categoryLabel,
+              icon: group?.icon ?? "Tag",
+              color: group?.color ?? "hsl(220 10% 50%)",
+            })
+            .select()
+            .single();
+          if (catErr) throw catErr;
+          categoryId = created.id;
+        }
+      }
+
       const payload = {
         budget_id: budgetId,
-        category_id: categoryId === "none" ? null : categoryId,
+        category_id: categoryId,
         amount: amt,
         description: fullDesc,
         expense_date: date,
@@ -185,11 +211,20 @@ export default function ExpenseForm() {
 
             <div className="space-y-1.5">
               <Label className="text-[11px] tracking-wider uppercase">Categoría</Label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
+              <Select value={categoryLabel} onValueChange={setCategoryLabel}>
                 <SelectTrigger><SelectValue placeholder="Seleccioná..." /></SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[60vh]">
                   <SelectItem value="none">Sin categoría</SelectItem>
-                  {(categories ?? []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  {CATEGORY_GROUPS.map(g => (
+                    <SelectGroup key={g.label}>
+                      <SelectLabel className="text-[11px] uppercase tracking-wider text-muted-foreground pt-2">
+                        {g.icon} {g.label}
+                      </SelectLabel>
+                      {g.items.map(item => (
+                        <SelectItem key={`${g.label}:${item}`} value={item}>{item}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
