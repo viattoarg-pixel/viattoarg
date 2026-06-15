@@ -1,4 +1,4 @@
-/** Iatto logo — green checkmark/leaf 'V' mark */
+/** Viatto logo — green checkmark/leaf 'V' mark */
 export const StackedLogo = ({ size = 16, color }: { size?: number; color?: string }) => {
   // Use brand green by default; allow override (e.g. sidebar currentColor)
   const stroke = color ?? "hsl(var(--primary))";
