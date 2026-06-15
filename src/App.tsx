@@ -9,10 +9,10 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import BugCreate from "./pages/BugCreate";
-import BugDetail from "./pages/BugDetail";
-import BugList from "./pages/BugList";
-import Analytics from "./pages/Analytics";
+import Budgets from "./pages/Budgets";
+import Expenses from "./pages/Expenses";
+import ExpenseForm from "./pages/ExpenseForm";
+import Categories from "./pages/Categories";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -30,10 +30,11 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/bugs" element={<ProtectedRoute><BugList /></ProtectedRoute>} />
-              <Route path="/bugs/new" element={<ProtectedRoute><BugCreate /></ProtectedRoute>} />
-              <Route path="/bugs/:id" element={<ProtectedRoute><BugDetail /></ProtectedRoute>} />
-              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+              <Route path="/budgets" element={<ProtectedRoute><Budgets /></ProtectedRoute>} />
+              <Route path="/expenses" element={<ProtectedRoute><Expenses /></ProtectedRoute>} />
+              <Route path="/expenses/new" element={<ProtectedRoute><ExpenseForm /></ProtectedRoute>} />
+              <Route path="/expenses/:id" element={<ProtectedRoute><ExpenseForm /></ProtectedRoute>} />
+              <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
