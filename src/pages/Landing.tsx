@@ -23,10 +23,10 @@ const Landing = () => {
 
       <nav className="sticky top-0 z-50 w-full">
         <div className="mx-auto mt-3 max-w-[1180px] px-4">
-          <div className="glass-strong rounded-full flex h-[56px] items-center justify-between pl-5 pr-2 shadow-soft">
-            <Link to="/" className="flex items-center gap-2">
-              <StackedLogo size={22} />
-              <span className="text-[17px] font-semibold lowercase tracking-tight text-foreground">{"\n\n"}</span>
+          <div className="glass-strong rounded-full flex h-[64px] items-center justify-between pl-5 pr-2 shadow-soft">
+            <Link to="/" className="flex items-center gap-2.5">
+              <StackedLogo size={36} />
+              <span className="text-[24px] font-bold lowercase tracking-tight text-foreground leading-none">viatto</span>
             </Link>
             <div className="hidden md:flex items-center gap-7 text-[13px] text-foreground/70">
               <a href="#features" className="hover:text-foreground transition-colors">Funciones</a>
@@ -179,8 +179,8 @@ const Landing = () => {
             <div className="relative glass-strong rounded-3xl p-8 shadow-float">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
-                  <StackedLogo size={20} />
-                  <span className="font-semibold lowercase">{"\n"}</span>
+                  <StackedLogo size={28} />
+                  <span className="font-bold lowercase text-[18px] leading-none">viatto</span>
                 </div>
                 <span className="text-[11px] text-muted-foreground">Junio 2026</span>
               </div>
