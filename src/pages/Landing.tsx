@@ -180,7 +180,7 @@ const Landing = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <StackedLogo size={20} />
-                  <span className="font-semibold lowercase">viatto</span>
+                  <span className="font-semibold lowercase">{"\n"}</span>
                 </div>
                 <span className="text-[11px] text-muted-foreground">Junio 2026</span>
               </div>
@@ -232,7 +232,7 @@ const Landing = () => {
         <div className="mx-auto max-w-[1180px] flex flex-col md:flex-row items-center justify-between gap-3 text-[12px] text-muted-foreground">
           <div className="flex items-center gap-2">
             <StackedLogo size={16} />
-            <span>viatto © {new Date().getFullYear()} · Hecho con respeto por las personas y los animales.</span>
+            <span>.</span>
           </div>
           <Link to="/auth" className="hover:text-foreground">Ingresar</Link>
         </div>
