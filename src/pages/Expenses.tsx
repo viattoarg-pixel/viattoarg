@@ -19,7 +19,7 @@ import { formatCurrency, formatDate } from "@/lib/format";
 import { downloadExpensePdf, downloadExpensesReportPdf } from "@/lib/pdf";
 import { toast } from "sonner";
 import {
-  Plus, Search, Pencil, Trash2, Image as ImageIcon, Download, Calendar, Utensils, Loader2,
+  Plus, Search, Pencil, Trash2, Image as ImageIcon, Download, Calendar, Utensils, Loader2, Leaf,
 } from "lucide-react";
 
 export default function Expenses() {
@@ -108,19 +108,18 @@ export default function Expenses() {
           {!active ? (
             <NoBudget />
           ) : (
-            <div className="relative overflow-hidden rounded-2xl bg-white text-black border border-black/10 p-5 md:p-6 shadow-sm">
-              <div className="absolute -right-8 -bottom-8 opacity-[0.06] pointer-events-none">
-                <svg width="240" height="240" viewBox="0 0 100 100" fill="none">
-                  <path d="M20 20 L50 80 L80 20" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-brand text-primary-foreground p-6 md:p-8 shadow-float">
+              <div className="absolute -right-12 -bottom-12 opacity-[0.10] pointer-events-none">
+                <Leaf className="h-64 w-64" />
               </div>
+              <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl pointer-events-none" />
               <div className="relative">
-                <div className="text-[11px] tracking-widest uppercase text-black/60 font-medium">Tope máximo disponible</div>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <div className="text-3xl md:text-4xl font-bold tabular-nums text-black">{formatCurrency(max, currency)}</div>
+                <div className="text-[11px] tracking-widest uppercase text-primary-foreground/70 font-medium">Tope máximo disponible</div>
+                <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                  <div className="text-3xl md:text-4xl font-bold tabular-nums">{formatCurrency(max, currency)}</div>
                   <Dialog open={editTopeOpen} onOpenChange={setEditTopeOpen}>
                     <DialogTrigger asChild>
-                      <Button size="sm" variant="ghost" className="h-7 text-[12px] gap-1.5 bg-black/5 hover:bg-black/10 text-black rounded-full px-3">
+                      <Button size="sm" variant="ghost" className="h-7 text-[12px] gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground rounded-full px-3">
                         <Pencil className="h-3 w-3" /> Editar tope
                       </Button>
                     </DialogTrigger>
@@ -128,24 +127,24 @@ export default function Expenses() {
                   </Dialog>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5">
-                  <div className="rounded-xl bg-white border border-black/15 p-3.5">
-                    <div className="text-[10px] tracking-widest uppercase text-black/60 font-medium">Monto gastado</div>
-                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1 text-black">{formatCurrency(spent, currency)}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6">
+                  <div className="rounded-2xl glass-strong p-4 text-foreground">
+                    <div className="text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Monto gastado</div>
+                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1">{formatCurrency(spent, currency)}</div>
                   </div>
-                  <div className="rounded-xl bg-white border border-black/15 p-3.5">
-                    <div className="text-[10px] tracking-widest uppercase text-black/60 font-medium">Saldo disponible</div>
-                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1 text-black">{formatCurrency(remaining, currency)}</div>
+                  <div className="rounded-2xl glass-strong p-4 text-foreground">
+                    <div className="text-[10px] tracking-widest uppercase text-muted-foreground font-medium">Saldo disponible</div>
+                    <div className="text-xl md:text-2xl font-bold tabular-nums mt-1 text-gradient-brand">{formatCurrency(remaining, currency)}</div>
                   </div>
                 </div>
 
-                <div className="mt-5">
+                <div className="mt-6">
                   <div className="flex items-center justify-between text-[11px] mb-1.5">
-                    <span className="text-black/70">Consumo del presupuesto</span>
-                    <span className="text-black tabular-nums">{pct.toFixed(1)}%</span>
+                    <span className="text-primary-foreground/80">Consumo del presupuesto</span>
+                    <span className="tabular-nums">{pct.toFixed(1)}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-black/10 overflow-hidden">
-                    <div className="h-full bg-black transition-all" style={{ width: `${pct}%` }} />
+                  <div className="h-2 rounded-full bg-white/15 overflow-hidden">
+                    <div className="h-full bg-white/90 transition-all" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               </div>
