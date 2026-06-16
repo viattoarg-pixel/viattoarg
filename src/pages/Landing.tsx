@@ -26,7 +26,7 @@ const Landing = () => {
           <div className="glass-strong rounded-full flex h-[56px] items-center justify-between pl-5 pr-2 shadow-soft">
             <Link to="/" className="flex items-center gap-2">
               <StackedLogo size={22} />
-              <span className="text-[17px] font-semibold lowercase tracking-tight text-foreground">viatto</span>
+              <span className="text-[17px] font-semibold lowercase tracking-tight text-foreground">{"\n\n"}</span>
             </Link>
             <div className="hidden md:flex items-center gap-7 text-[13px] text-foreground/70">
               <a href="#features" className="hover:text-foreground transition-colors">Funciones</a>
