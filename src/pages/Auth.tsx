@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
-import { StackedLogo } from "@/components/StackedLogo";
+import viattoLogo from "@/assets/viatto-logo.png.asset.json";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable/index";
 
@@ -79,9 +79,8 @@ export default function Auth() {
       <div className="w-full max-w-[420px] border border-border rounded-md p-8 space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-start gap-3">
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <StackedLogo size={16} />
-            <span className="text-[18px] font-semibold lowercase tracking-tight text-foreground">{"\n"}</span>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img src={viattoLogo.url} alt="viatto" className="h-12 w-auto" />
           </Link>
           <p className="text-[13px] text-muted-foreground">Controlá tus viáticos en un solo lugar</p>
         </div>
