@@ -25,14 +25,6 @@ export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: 
 
   return (
     <>
-      <div className="flex items-center gap-2 px-3 h-14 border-b border-sidebar-border">
-        <StackedLogo size={32} color="currentColor" />
-        {!collapsed && (
-          <span className="font-bold lowercase tracking-tight text-[22px] text-sidebar-accent-foreground leading-none">
-            {"\n"}
-          </span>
-        )}
-      </div>
 
       <nav className="flex-1 py-1.5 px-1.5 space-y-px">
         {navItems.map((item) => {

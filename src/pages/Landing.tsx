@@ -34,13 +34,6 @@ const Landing = () => {
               <a href="#pricing" className="hover:text-foreground transition-colors">Planes</a>
             </div>
             <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setTheme(isDark ? "light" : "dark")}
-                className="h-9 w-9 flex items-center justify-center text-foreground/70 hover:text-foreground rounded-full hover:bg-muted/50 transition-colors"
-                aria-label="Cambiar tema"
-              >
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
               <Link
                 to="/auth"
                 className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-gradient-brand text-primary-foreground text-[13px] font-medium hover:opacity-95 transition-all shadow-glow"
