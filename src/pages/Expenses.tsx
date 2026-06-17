@@ -17,6 +17,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { downloadExpensePdf, downloadExpensesReportPdf } from "@/lib/pdf";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
   Plus, Search, Pencil, Trash2, Image as ImageIcon, Download, Calendar, Utensils, Loader2, Leaf,
@@ -24,6 +25,7 @@ import {
 
 export default function Expenses() {
   const active = useActiveBudget();
+  const { user, profile } = useAuth();
   const { data: expenses, isLoading } = useExpenses(active?.id);
   const { data: categories } = useCategories();
   const del = useDeleteExpense();
