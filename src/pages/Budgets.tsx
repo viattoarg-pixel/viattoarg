@@ -159,7 +159,7 @@ function BudgetDialog({ editing, onClose }: { editing: Budget | null; onClose: (
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="name">Nombre</Label>
-          <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Viaje a Córdoba, Viáticos Marzo..." required />
+          <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Nombre del ente o empresa" required />
         </div>
         <div className="grid grid-cols-[1fr_120px] gap-3">
           <div className="space-y-1.5">

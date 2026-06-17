@@ -206,7 +206,7 @@ export default function ExpenseForm() {
           <form onSubmit={submit} className="max-w-[520px] space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="name" className="text-[11px] tracking-wider uppercase">Nombre</Label>
-              <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Ej: Almuerzo cliente" required />
+              <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Nombre del supermercado, tienda, restaurante, estación de servicio..." required />
             </div>
 
             <div className="space-y-1.5">
@@ -217,11 +217,11 @@ export default function ExpenseForm() {
                   <SelectItem value="none">Sin categoría</SelectItem>
                   {CATEGORY_GROUPS.map(g => (
                     <SelectGroup key={g.label}>
-                      <SelectLabel className="text-[11px] uppercase tracking-wider text-muted-foreground pt-2">
-                        {g.icon} {g.label}
+                      <SelectLabel className="text-[12px] font-bold uppercase tracking-wider text-foreground pt-3 pb-1 border-b border-border mb-1">
+                        {g.label}
                       </SelectLabel>
                       {g.items.map(item => (
-                        <SelectItem key={`${g.label}:${item}`} value={item}>{item}</SelectItem>
+                        <SelectItem key={`${g.label}:${item}`} value={item} className="pl-6 text-[13px]">{item}</SelectItem>
                       ))}
                     </SelectGroup>
                   ))}
