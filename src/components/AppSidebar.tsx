@@ -29,7 +29,7 @@ export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: 
         <StackedLogo size={32} color="currentColor" />
         {!collapsed && (
           <span className="font-bold lowercase tracking-tight text-[22px] text-sidebar-accent-foreground leading-none">
-            viatto
+            {"\n"}
           </span>
         )}
       </div>
