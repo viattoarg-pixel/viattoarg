@@ -26,7 +26,7 @@ const Landing = () => {
           <div className="glass-strong rounded-full flex h-[64px] items-center justify-between pl-5 pr-2 shadow-soft">
             <Link to="/" className="flex items-center gap-2.5">
               <StackedLogo size={36} />
-              <span className="text-[24px] font-bold lowercase tracking-tight text-foreground leading-none">viatto</span>
+              <span className="text-[24px] font-bold lowercase tracking-tight text-foreground leading-none">{"\n"}</span>
             </Link>
             <div className="hidden md:flex items-center gap-7 text-[13px] text-foreground/70">
               <a href="#features" className="hover:text-foreground transition-colors">Funciones</a>
@@ -180,7 +180,7 @@ const Landing = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <StackedLogo size={28} />
-                  <span className="font-bold lowercase text-[18px] leading-none">viatto</span>
+                  <span className="font-bold lowercase text-[18px] leading-none">{"\n"}</span>
                 </div>
                 <span className="text-[11px] text-muted-foreground">Junio 2026</span>
               </div>
