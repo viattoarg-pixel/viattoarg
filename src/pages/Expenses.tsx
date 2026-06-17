@@ -49,6 +49,7 @@ export default function Expenses() {
 
   const handleDownloadOne = async (e: any) => {
     const catName = e.category_id ? categoryMap.get(e.category_id)?.name : null;
+    const pdfUser = { full_name: profile?.full_name ?? null, email: user?.email ?? null };
     toast.promise(
       downloadExpensePdf({
         id: e.id,
@@ -57,18 +58,20 @@ export default function Expenses() {
         expense_date: e.expense_date,
         receipt_url: e.receipt_url,
         category_name: catName,
-      }, currency),
+      }, currency, pdfUser),
       { loading: "Generando PDF...", success: "PDF descargado", error: "Error al generar PDF" }
     );
   };
 
   const handleDownloadAll = async () => {
+    const pdfUser = { full_name: profile?.full_name ?? null, email: user?.email ?? null };
     toast.promise(
       downloadExpensesReportPdf({
         budget: active ? { name: active.name, max_amount: max, currency } : null,
         spent,
         remaining,
         currency,
+        user: pdfUser,
         expenses: filtered.map(e => ({
           id: e.id,
           description: e.description,
