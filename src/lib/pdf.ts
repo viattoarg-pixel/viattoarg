@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "./format";
+import logoAsset from "@/assets/viatto-logo.png.asset.json";
 
 export type PdfExpense = {
   id: string;
@@ -16,6 +17,31 @@ export type PdfBudget = {
   max_amount: number;
   currency: string;
 };
+
+export type PdfUser = {
+  full_name?: string | null;
+  email?: string | null;
+};
+
+// Cache the logo data URL so it loads only once
+let logoCache: string | null = null;
+async function getLogoDataUrl(): Promise<string | null> {
+  if (logoCache) return logoCache;
+  try {
+    const res = await fetch(logoAsset.url);
+    const blob = await res.blob();
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result as string);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    logoCache = dataUrl;
+    return dataUrl;
+  } catch {
+    return null;
+  }
+}
 
 async function loadReceiptImage(path: string): Promise<{ dataUrl: string; ext: string } | null> {
   try {
@@ -37,58 +63,136 @@ async function loadReceiptImage(path: string): Promise<{ dataUrl: string; ext: s
   }
 }
 
-function header(doc: jsPDF, title: string) {
-  doc.setFillColor(90, 122, 74);
-  doc.rect(0, 0, 210, 28, "F");
-  doc.setTextColor(255, 255, 255);
+const PAGE_W = 210;
+const PAGE_H = 297;
+const MARGIN = 16;
+
+async function drawHeader(doc: jsPDF, title: string, subtitle?: string) {
+  // Top white header band with logo + brand
+  const logo = await getLogoDataUrl();
+  if (logo) {
+    try {
+      doc.addImage(logo, "PNG", MARGIN, 12, 28, 10);
+    } catch { /* noop */ }
+  }
+
+  // Title block
+  doc.setTextColor(20, 30, 45);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text("viatto", 14, 13);
+  doc.setFontSize(16);
+  doc.text(title, PAGE_W - MARGIN, 18, { align: "right" });
+  if (subtitle) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(110, 120, 130);
+    doc.text(subtitle, PAGE_W - MARGIN, 24, { align: "right" });
+  }
+
+  // Divider
+  doc.setDrawColor(20, 30, 45);
+  doc.setLineWidth(0.4);
+  doc.line(MARGIN, 28, PAGE_W - MARGIN, 28);
+  doc.setTextColor(20, 20, 20);
+  doc.setLineWidth(0.2);
+}
+
+function drawUserBlock(doc: jsPDF, user: PdfUser | undefined, yStart: number): number {
+  const now = new Date();
+  const generated = now.toLocaleString("es-AR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+
+  doc.setFontSize(9);
+  doc.setTextColor(110, 120, 130);
+  doc.setFont("helvetica", "bold");
+  doc.text("PREPARADO POR", MARGIN, yStart);
+  doc.text("FECHA DE EMISIÓN", PAGE_W - MARGIN, yStart, { align: "right" });
+
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-  doc.text(title, 14, 22);
+  doc.setTextColor(20, 30, 45);
+  doc.setFontSize(10);
+  const name = user?.full_name || "Usuario";
+  const email = user?.email || "—";
+  doc.text(name, MARGIN, yStart + 5);
+  doc.setTextColor(90, 100, 110);
+  doc.setFontSize(9);
+  doc.text(email, MARGIN, yStart + 10);
+
+  doc.setTextColor(20, 30, 45);
+  doc.setFontSize(10);
+  doc.text(generated, PAGE_W - MARGIN, yStart + 5, { align: "right" });
+
+  doc.setTextColor(20, 20, 20);
+  return yStart + 16;
+}
+
+function drawFooter(doc: jsPDF) {
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(220);
+    doc.line(MARGIN, PAGE_H - 14, PAGE_W - MARGIN, PAGE_H - 14);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(130, 140, 150);
+    doc.text("viatto · Reporte de viáticos", MARGIN, PAGE_H - 9);
+    doc.text(`Página ${i} de ${pageCount}`, PAGE_W - MARGIN, PAGE_H - 9, { align: "right" });
+    doc.setTextColor(20, 20, 20);
+  }
+}
+
+function drawKeyValueRow(doc: jsPDF, label: string, value: string, y: number) {
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(60, 70, 80);
+  doc.text(label, MARGIN, y);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(20, 30, 45);
+  doc.text(value, MARGIN + 45, y);
   doc.setTextColor(20, 20, 20);
 }
 
-export async function downloadExpensePdf(expense: PdfExpense, currency = "ARS") {
+export async function downloadExpensePdf(expense: PdfExpense, currency = "ARS", user?: PdfUser) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  header(doc, "Comprobante de gasto");
+  await drawHeader(doc, "Comprobante de gasto", expense.description || undefined);
 
-  let y = 40;
-  doc.setFontSize(11);
-  const rows: [string, string][] = [
-    ["Nombre", expense.description || "Sin nombre"],
-    ["Fecha", formatDate(expense.expense_date)],
-    ["Categoría", expense.category_name ?? "Sin categoría"],
-    ["Monto", formatCurrency(expense.amount, currency)],
-  ];
-  rows.forEach(([k, v]) => {
-    doc.setFont("helvetica", "bold");
-    doc.text(`${k}:`, 14, y);
-    doc.setFont("helvetica", "normal");
-    doc.text(String(v), 50, y);
-    y += 8;
-  });
+  let y = drawUserBlock(doc, user, 36);
+  y += 4;
+
+  // Boxed details
+  doc.setDrawColor(220);
+  doc.setFillColor(248, 249, 251);
+  doc.roundedRect(MARGIN, y, PAGE_W - MARGIN * 2, 36, 1.5, 1.5, "FD");
+  let ry = y + 8;
+  drawKeyValueRow(doc, "Nombre", expense.description || "Sin nombre", ry); ry += 7;
+  drawKeyValueRow(doc, "Fecha", formatDate(expense.expense_date), ry); ry += 7;
+  drawKeyValueRow(doc, "Categoría", expense.category_name ?? "Sin categoría", ry); ry += 7;
+  drawKeyValueRow(doc, "Monto", formatCurrency(expense.amount, currency), ry);
+  y += 44;
 
   if (expense.receipt_url) {
-    y += 4;
     doc.setFont("helvetica", "bold");
-    doc.text("Comprobante:", 14, y);
-    y += 6;
+    doc.setFontSize(10);
+    doc.setTextColor(60, 70, 80);
+    doc.text("Comprobante", MARGIN, y);
+    y += 5;
     const img = await loadReceiptImage(expense.receipt_url);
     if (img) {
       try {
-        doc.addImage(img.dataUrl, img.ext, 14, y, 120, 0);
+        doc.addImage(img.dataUrl, img.ext, MARGIN, y, 120, 0);
       } catch {
         doc.setFont("helvetica", "italic");
-        doc.text("(No se pudo incrustar la imagen)", 14, y);
+        doc.text("(No se pudo incrustar la imagen)", MARGIN, y);
       }
     } else {
       doc.setFont("helvetica", "italic");
-      doc.text("(Comprobante no disponible o no es imagen)", 14, y);
+      doc.setTextColor(130);
+      doc.text("(Comprobante no disponible o no es imagen)", MARGIN, y);
     }
   }
 
+  drawFooter(doc);
   doc.save(`gasto-${(expense.description || expense.id).slice(0, 40)}.pdf`);
 }
 
@@ -98,51 +202,98 @@ export async function downloadExpensesReportPdf(opts: {
   remaining: number;
   expenses: PdfExpense[];
   currency: string;
+  user?: PdfUser;
 }) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  header(doc, opts.budget?.name ?? "Reporte de gastos");
+  await drawHeader(doc, "Reporte de gastos", opts.budget?.name ?? undefined);
 
-  let y = 38;
-  doc.setFontSize(11);
+  let y = drawUserBlock(doc, opts.user, 36);
+  y += 4;
+
+  // Summary box
   if (opts.budget) {
-    doc.setFont("helvetica", "bold"); doc.text("Tope máximo:", 14, y);
-    doc.setFont("helvetica", "normal"); doc.text(formatCurrency(opts.budget.max_amount, opts.currency), 55, y); y += 7;
-    doc.setFont("helvetica", "bold"); doc.text("Gastado:", 14, y);
-    doc.setFont("helvetica", "normal"); doc.text(formatCurrency(opts.spent, opts.currency), 55, y); y += 7;
-    doc.setFont("helvetica", "bold"); doc.text("Disponible:", 14, y);
-    doc.setFont("helvetica", "normal"); doc.text(formatCurrency(opts.remaining, opts.currency), 55, y); y += 10;
+    doc.setDrawColor(220);
+    doc.setFillColor(248, 249, 251);
+    doc.roundedRect(MARGIN, y, PAGE_W - MARGIN * 2, 30, 1.5, 1.5, "FD");
+    let ry = y + 8;
+    drawKeyValueRow(doc, "Tope máximo", formatCurrency(opts.budget.max_amount, opts.currency), ry); ry += 7;
+    drawKeyValueRow(doc, "Gastado", formatCurrency(opts.spent, opts.currency), ry); ry += 7;
+    drawKeyValueRow(doc, "Disponible", formatCurrency(opts.remaining, opts.currency), ry);
+    y += 38;
   }
 
-  doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.text("Detalle de gastos", 14, y); y += 6;
+  // Detail header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(20, 30, 45);
+  doc.text("Detalle de gastos", MARGIN, y);
+  y += 3;
+  doc.setDrawColor(20, 30, 45);
+  doc.setLineWidth(0.3);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  y += 6;
+  doc.setLineWidth(0.2);
+
+  // Column headers
+  doc.setFontSize(8);
+  doc.setTextColor(110, 120, 130);
+  doc.text("FECHA", MARGIN, y);
+  doc.text("DESCRIPCIÓN", MARGIN + 26, y);
+  doc.text("CATEGORÍA", MARGIN + 100, y);
+  doc.text("MONTO", PAGE_W - MARGIN, y, { align: "right" });
+  y += 4;
+  doc.setDrawColor(230);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  y += 5;
+
+  doc.setTextColor(20, 30, 45);
   doc.setFontSize(10);
-  doc.setDrawColor(200);
-  doc.line(14, y, 196, y); y += 5;
 
   for (const e of opts.expenses) {
-    if (y > 260) { doc.addPage(); y = 20; }
-    doc.setFont("helvetica", "bold");
-    doc.text(e.description || "Sin nombre", 14, y);
+    if (y > PAGE_H - 30) {
+      drawFooter(doc);
+      doc.addPage();
+      await drawHeader(doc, "Reporte de gastos", opts.budget?.name ?? undefined);
+      y = 40;
+    }
     doc.setFont("helvetica", "normal");
-    doc.text(formatCurrency(e.amount, opts.currency), 196, y, { align: "right" });
-    y += 5;
-    doc.setTextColor(110);
-    doc.text(`${formatDate(e.expense_date)} · ${e.category_name ?? "Sin categoría"}`, 14, y);
-    doc.setTextColor(20);
-    y += 6;
+    doc.text(formatDate(e.expense_date), MARGIN, y);
+    const desc = doc.splitTextToSize(e.description || "Sin nombre", 70);
+    doc.text(desc, MARGIN + 26, y);
+    doc.setTextColor(110, 120, 130);
+    doc.text(e.category_name ?? "Sin categoría", MARGIN + 100, y);
+    doc.setTextColor(20, 30, 45);
+    doc.setFont("helvetica", "bold");
+    doc.text(formatCurrency(e.amount, opts.currency), PAGE_W - MARGIN, y, { align: "right" });
+    y += Math.max(5, desc.length * 4.5);
 
     if (e.receipt_url) {
       const img = await loadReceiptImage(e.receipt_url);
       if (img) {
-        if (y > 200) { doc.addPage(); y = 20; }
+        if (y > PAGE_H - 70) {
+          drawFooter(doc);
+          doc.addPage();
+          await drawHeader(doc, "Reporte de gastos", opts.budget?.name ?? undefined);
+          y = 40;
+        }
         try {
-          doc.addImage(img.dataUrl, img.ext, 14, y, 70, 0);
-          y += 55;
+          doc.addImage(img.dataUrl, img.ext, MARGIN, y, 60, 0);
+          y += 50;
         } catch { /* noop */ }
       }
     }
-    doc.setDrawColor(230);
-    doc.line(14, y, 196, y); y += 5;
+    doc.setDrawColor(238);
+    doc.line(MARGIN, y, PAGE_W - MARGIN, y); y += 5;
   }
 
+  // Totals row
+  if (y > PAGE_H - 30) { drawFooter(doc); doc.addPage(); y = 30; }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(20, 30, 45);
+  doc.text("Total", MARGIN, y + 4);
+  doc.text(formatCurrency(opts.spent, opts.currency), PAGE_W - MARGIN, y + 4, { align: "right" });
+
+  drawFooter(doc);
   doc.save(`gastos-${opts.budget?.name ?? "reporte"}.pdf`);
 }
