@@ -238,8 +238,8 @@ export async function downloadExpensesReportPdf(opts: {
   doc.setFontSize(8);
   doc.setTextColor(110, 120, 130);
   doc.text("FECHA", MARGIN, y);
-  doc.text("DESCRIPCIÓN", MARGIN + 26, y);
-  doc.text("CATEGORÍA", MARGIN + 100, y);
+  doc.text("DESCRIPCIÓN", MARGIN + 36, y);
+  doc.text("CATEGORÍA", MARGIN + 110, y);
   doc.text("MONTO", PAGE_W - MARGIN, y, { align: "right" });
   y += 4;
   doc.setDrawColor(230);
@@ -258,14 +258,15 @@ export async function downloadExpensesReportPdf(opts: {
     }
     doc.setFont("helvetica", "normal");
     doc.text(formatDate(e.expense_date), MARGIN, y);
-    const desc = doc.splitTextToSize(e.description || "Sin nombre", 70);
-    doc.text(desc, MARGIN + 26, y);
+    const desc = doc.splitTextToSize(e.description || "Sin nombre", 68);
+    doc.text(desc, MARGIN + 36, y);
     doc.setTextColor(110, 120, 130);
-    doc.text(e.category_name ?? "Sin categoría", MARGIN + 100, y);
+    const cat = doc.splitTextToSize(e.category_name ?? "Sin categoría", 40);
+    doc.text(cat, MARGIN + 110, y);
     doc.setTextColor(20, 30, 45);
     doc.setFont("helvetica", "bold");
     doc.text(formatCurrency(e.amount, opts.currency), PAGE_W - MARGIN, y, { align: "right" });
-    y += Math.max(5, desc.length * 4.5);
+    y += Math.max(5, Math.max(desc.length, cat.length) * 4.5);
 
     if (e.receipt_url) {
       const img = await loadReceiptImage(e.receipt_url);
