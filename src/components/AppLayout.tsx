@@ -26,9 +26,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             </SheetContent>
           </Sheet>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center">
             <StackedLogo size={16} />
-            <span className="font-bold lowercase tracking-tight text-[16px] text-foreground">viatto</span>
           </div>
           <div className="w-7" />
         </header>
