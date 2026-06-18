@@ -28,8 +28,10 @@ export default function Settings() {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: name, job_title: jobTitle })
-        .eq("user_id", user.id);
+        .upsert(
+          { user_id: user.id, full_name: name, job_title: jobTitle },
+          { onConflict: "user_id" }
+        );
       if (error) throw error;
       await refreshProfile();
       toast.success("Perfil actualizado");
