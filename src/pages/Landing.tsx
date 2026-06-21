@@ -152,7 +152,6 @@ const Landing = () => {
               {[
                 { icon: Shield, t: "Datos seguros", d: "Cifrado en reposo y en tránsito, accesos controlados." },
                 { icon: Sparkles, t: "Experiencia premium", d: "Interfaz fluida, microinteracciones y oscuro nativo." },
-                { icon: Leaf, t: "Consciente", d: "Donamos parte de lo recaudado a refugios de animales." },
               ].map(i => (
                 <li key={i.t} className="flex gap-3">
                   <div className="h-8 w-8 rounded-xl bg-gradient-soft border border-border flex items-center justify-center shrink-0">
