@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "./format";
-import logoAsset from "@/assets/viatto-logo-transparent.png.asset.json";
+import logoAsset from "@/assets/viatto-logo-official.png.asset.json";
 
 export type PdfExpense = {
   id: string;
