@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Moon, Sun, Wallet, Receipt, BarChart3, Paperclip, Leaf, Shield, Sparkles } from "lucide-react";
+import { ArrowRight, Moon, Sun, Wallet, Receipt, BarChart3, Paperclip, Shield, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { StackedLogo } from "@/components/StackedLogo";
 
