@@ -3,7 +3,7 @@ import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import viattoLogo from "@/assets/viatto-logo-transparent.png.asset.json";
+import viattoLogo from "@/assets/viatto-logo-official.png.asset.json";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable/index";
 
