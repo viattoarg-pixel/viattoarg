@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Moon, Sun, Wallet, Receipt, BarChart3, Paperclip, Leaf, Shield, Sparkles } from "lucide-react";
+import { ArrowRight, Moon, Sun, Wallet, Receipt, BarChart3, Paperclip, Shield, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { StackedLogo } from "@/components/StackedLogo";
 
@@ -49,8 +49,7 @@ const Landing = () => {
       <section className="relative px-6 pt-24 pb-24">
         <div className="mx-auto max-w-[960px] text-center space-y-7">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass text-[12px] text-foreground/75">
-            <Leaf className="h-3 w-3 text-primary" />
-            Gestión de viáticos consciente y sostenible
+            Controlá tus viáticos con claridad
           </div>
           <h1 className="text-5xl md:text-7xl font-semibold tracking-[-0.03em] leading-[1.02]">
             Controlá tus viáticos<br />
@@ -152,7 +151,6 @@ const Landing = () => {
               {[
                 { icon: Shield, t: "Datos seguros", d: "Cifrado en reposo y en tránsito, accesos controlados." },
                 { icon: Sparkles, t: "Experiencia premium", d: "Interfaz fluida, microinteracciones y oscuro nativo." },
-                { icon: Leaf, t: "Consciente", d: "Donamos parte de lo recaudado a refugios de animales." },
               ].map(i => (
                 <li key={i.t} className="flex gap-3">
                   <div className="h-8 w-8 rounded-xl bg-gradient-soft border border-border flex items-center justify-center shrink-0">
