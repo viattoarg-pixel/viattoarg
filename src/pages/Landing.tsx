@@ -49,8 +49,7 @@ const Landing = () => {
       <section className="relative px-6 pt-24 pb-24">
         <div className="mx-auto max-w-[960px] text-center space-y-7">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass text-[12px] text-foreground/75">
-            <Leaf className="h-3 w-3 text-primary" />
-            Gestión de viáticos consciente y sostenible
+            Controlá tus viáticos con claridad
           </div>
           <h1 className="text-5xl md:text-7xl font-semibold tracking-[-0.03em] leading-[1.02]">
             Controlá tus viáticos<br />
