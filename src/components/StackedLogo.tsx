@@ -1,4 +1,4 @@
-import logoAsset from "@/assets/viatto-logo-official.png.asset.json";
+import logoAsset from "@/assets/viatto-leaf-logo.png.asset.json";
 
 /** Viatto official logo (image). `size` controls height; width auto-scales. */
 export const StackedLogo = ({ size = 24 }: { size?: number; color?: string }) => {

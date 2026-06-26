@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "./format";
-import logoAsset from "@/assets/viatto-logo-official.png.asset.json";
+import logoAsset from "@/assets/viatto-leaf-logo.png.asset.json";
 
 export type PdfExpense = {
   id: string;
@@ -72,7 +72,7 @@ async function drawHeader(doc: jsPDF, title: string, subtitle?: string) {
   const logo = await getLogoDataUrl();
   if (logo) {
     try {
-      doc.addImage(logo, "PNG", MARGIN, 12, 28, 10);
+      doc.addImage(logo, "PNG", MARGIN, 10, 14, 14);
     } catch { /* noop */ }
   }
 
