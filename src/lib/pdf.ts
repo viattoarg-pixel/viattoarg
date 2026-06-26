@@ -72,7 +72,7 @@ async function drawHeader(doc: jsPDF, title: string, subtitle?: string) {
   const logo = await getLogoDataUrl();
   if (logo) {
     try {
-      doc.addImage(logo, "PNG", MARGIN, 12, 28, 10);
+      doc.addImage(logo, "PNG", MARGIN, 10, 14, 14);
     } catch { /* noop */ }
   }
 
