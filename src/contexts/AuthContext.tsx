@@ -5,13 +5,18 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
 
+export const normalizeUsername = (username: string) =>
+  username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+
+const usernameToEmail = (normalized: string) => `${normalized}@viatto.app`;
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (username: string, password: string, fullName: string) => Promise<void>;
+  signIn: (username: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -59,20 +64,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (username: string, password: string, fullName: string) => {
+    const normalized = normalizeUsername(username);
     const { error } = await supabase.auth.signUp({
-      email,
+      email: usernameToEmail(normalized),
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, username: normalized },
         emailRedirectTo: window.location.origin,
       },
     });
     if (error) throw error;
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const signIn = async (username: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: usernameToEmail(normalizeUsername(username)),
+      password,
+    });
     if (error) throw error;
   };
 

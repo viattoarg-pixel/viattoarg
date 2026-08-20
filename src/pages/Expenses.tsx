@@ -51,7 +51,7 @@ export default function Expenses() {
 
   const handleDownloadOne = async (e: any) => {
     const catName = e.category_id ? categoryMap.get(e.category_id)?.name : null;
-    const pdfUser = { full_name: profile?.full_name ?? null, email: user?.email ?? null };
+    const pdfUser = { full_name: profile?.full_name ?? null, email: profile?.username ? `@${profile.username}` : (user?.email ?? null) };
     toast.promise(
       downloadExpensePdf({
         id: e.id,
@@ -66,7 +66,7 @@ export default function Expenses() {
   };
 
   const handleDownloadAll = async () => {
-    const pdfUser = { full_name: profile?.full_name ?? null, email: user?.email ?? null };
+    const pdfUser = { full_name: profile?.full_name ?? null, email: profile?.username ? `@${profile.username}` : (user?.email ?? null) };
     toast.promise(
       downloadExpensesReportPdf({
         budget: active ? { name: active.name, max_amount: max, currency } : null,
