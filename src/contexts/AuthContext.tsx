@@ -70,11 +70,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       password: pinToPassword(pin),
       options: {
         data: { full_name: fullName, username: pin },
-        emailRedirectTo: window.location.origin,
       },
     });
     if (error) throw error;
+    // Con auto-confirmación activada la sesión llega en el signUp; si no,
+    // iniciamos sesión explícitamente para no depender del correo.
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: pinToEmail(pin),
+        password: pinToPassword(pin),
+      });
+      if (signInError) throw signInError;
+    }
   };
+
 
   const signIn = async (pin: string) => {
     const { error } = await supabase.auth.signInWithPassword({

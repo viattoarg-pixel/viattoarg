@@ -53,7 +53,10 @@ export default function Auth() {
           ? "Ese PIN no existe. Creá una cuenta nueva."
           : /already registered|already exists|user_already/i.test(msg)
           ? "Ese PIN ya está en uso. Probá con otro."
+          : /rate limit|too many requests|over_email_send/i.test(msg)
+          ? "Demasiados intentos seguidos. Esperá un minuto y volvé a probar."
           : msg,
+
         variant: "destructive",
       });
     } finally {
