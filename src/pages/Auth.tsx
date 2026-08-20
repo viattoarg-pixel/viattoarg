@@ -87,29 +87,16 @@ export default function Auth() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-[13px]">Usuario</Label>
+            <Label htmlFor="pin" className="text-[13px]">PIN de 4 dígitos</Label>
             <Input
-              id="username"
-              autoComplete="username"
-              autoCapitalize="none"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Ej: juanperez"
-              maxLength={40}
-              className="h-11"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-[13px]">Contraseña</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              className="h-11"
+              id="pin"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={pin}
+              onChange={(e) => setPin(normalizePin(e.target.value))}
+              placeholder="••••"
+              maxLength={4}
+              className="h-14 text-center text-2xl tracking-[0.5em] font-semibold"
             />
           </div>
 
