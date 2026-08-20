@@ -56,8 +56,8 @@ export default function Settings() {
               <p className="text-[12px] text-muted-foreground mt-0.5">Tu información personal.</p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" value={user?.email ?? ""} disabled />
+              <Label htmlFor="email">Usuario</Label>
+              <Input id="email" value={profile?.username ? `@${profile.username}` : (user?.email ?? "")} disabled />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="name">Nombre completo</Label>
