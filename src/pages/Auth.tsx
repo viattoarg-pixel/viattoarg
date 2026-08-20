@@ -28,11 +28,11 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const normalized = normalizeUsername(username);
-    if (normalized.length < 3 || password.length < 6) {
+    const normalized = normalizePin(pin);
+    if (normalized.length !== 4) {
       toast({
-        title: "Datos incompletos",
-        description: "El usuario debe tener al menos 3 caracteres y la contraseña 6.",
+        title: "PIN incompleto",
+        description: "Ingresá un PIN de 4 dígitos.",
         variant: "destructive",
       });
       return;
@@ -40,19 +40,19 @@ export default function Auth() {
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        await signUp(normalized, password, fullName.trim());
-        toast({ title: "Cuenta creada", description: "Ya podés empezar a usar viatto." });
+        await signUp(normalized, fullName.trim());
+        toast({ title: "Cuenta creada", description: "Guardá tu PIN, con eso ingresás." });
       } else {
-        await signIn(normalized, password);
+        await signIn(normalized);
       }
     } catch (error: any) {
       const msg: string = error?.message ?? "Intentá de nuevo";
       toast({
         title: mode === "signup" ? "No se pudo crear la cuenta" : "No se pudo iniciar sesión",
         description: /invalid login credentials/i.test(msg)
-          ? "Usuario o contraseña incorrectos."
-          : /already registered|already exists/i.test(msg)
-          ? "Ese usuario ya existe. Iniciá sesión."
+          ? "Ese PIN no existe. Creá una cuenta nueva."
+          : /already registered|already exists|user_already/i.test(msg)
+          ? "Ese PIN ya está en uso. Probá con otro."
           : msg,
         variant: "destructive",
       });
