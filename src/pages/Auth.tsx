@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { useAuth, normalizeUsername } from "@/contexts/AuthContext";
+import { useAuth, normalizePin } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,7 @@ export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const { toast } = useToast();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [fullName, setFullName] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -29,11 +28,11 @@ export default function Auth() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const normalized = normalizeUsername(username);
-    if (normalized.length < 3 || password.length < 6) {
+    const normalized = normalizePin(pin);
+    if (normalized.length !== 4) {
       toast({
-        title: "Datos incompletos",
-        description: "El usuario debe tener al menos 3 caracteres y la contraseña 6.",
+        title: "PIN incompleto",
+        description: "Ingresá un PIN de 4 dígitos.",
         variant: "destructive",
       });
       return;
@@ -41,19 +40,19 @@ export default function Auth() {
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        await signUp(normalized, password, fullName.trim());
-        toast({ title: "Cuenta creada", description: "Ya podés empezar a usar viatto." });
+        await signUp(normalized, fullName.trim());
+        toast({ title: "Cuenta creada", description: "Guardá tu PIN, con eso ingresás." });
       } else {
-        await signIn(normalized, password);
+        await signIn(normalized);
       }
     } catch (error: any) {
       const msg: string = error?.message ?? "Intentá de nuevo";
       toast({
         title: mode === "signup" ? "No se pudo crear la cuenta" : "No se pudo iniciar sesión",
         description: /invalid login credentials/i.test(msg)
-          ? "Usuario o contraseña incorrectos."
-          : /already registered|already exists/i.test(msg)
-          ? "Ese usuario ya existe. Iniciá sesión."
+          ? "Ese PIN no existe. Creá una cuenta nueva."
+          : /already registered|already exists|user_already/i.test(msg)
+          ? "Ese PIN ya está en uso. Probá con otro."
           : msg,
         variant: "destructive",
       });
@@ -88,29 +87,16 @@ export default function Auth() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-[13px]">Usuario</Label>
+            <Label htmlFor="pin" className="text-[13px]">PIN de 4 dígitos</Label>
             <Input
-              id="username"
-              autoComplete="username"
-              autoCapitalize="none"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Ej: juanperez"
-              maxLength={40}
-              className="h-11"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-[13px]">Contraseña</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Mínimo 6 caracteres"
-              className="h-11"
+              id="pin"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={pin}
+              onChange={(e) => setPin(normalizePin(e.target.value))}
+              placeholder="••••"
+              maxLength={4}
+              className="h-14 text-center text-2xl tracking-[0.5em] font-semibold"
             />
           </div>
 
