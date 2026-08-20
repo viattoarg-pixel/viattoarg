@@ -5,18 +5,18 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
 
-export const normalizeUsername = (username: string) =>
-  username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+export const normalizePin = (pin: string) => pin.replace(/\D/g, "").slice(0, 4);
 
-const usernameToEmail = (normalized: string) => `${normalized}@viatto.app`;
+const pinToEmail = (pin: string) => `pin-${pin}@viatto.app`;
+const pinToPassword = (pin: string) => `viatto-pin-${pin}-2026`;
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (username: string, password: string, fullName: string) => Promise<void>;
-  signIn: (username: string, password: string) => Promise<void>;
+  signUp: (pin: string, fullName: string) => Promise<void>;
+  signIn: (pin: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
