@@ -64,23 +64,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (username: string, password: string, fullName: string) => {
-    const normalized = normalizeUsername(username);
+  const signUp = async (pin: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
-      email: usernameToEmail(normalized),
-      password,
+      email: pinToEmail(pin),
+      password: pinToPassword(pin),
       options: {
-        data: { full_name: fullName, username: normalized },
+        data: { full_name: fullName, username: pin },
         emailRedirectTo: window.location.origin,
       },
     });
     if (error) throw error;
   };
 
-  const signIn = async (username: string, password: string) => {
+  const signIn = async (pin: string) => {
     const { error } = await supabase.auth.signInWithPassword({
-      email: usernameToEmail(normalizeUsername(username)),
-      password,
+      email: pinToEmail(pin),
+      password: pinToPassword(pin),
     });
     if (error) throw error;
   };
