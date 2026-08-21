@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { useAuth, normalizePin, PIN_LENGTH } from "@/contexts/AuthContext";
+import {
+  useAuth,
+  normalizePin,
+  normalizeCode,
+  PIN_LENGTH,
+  CODE_LENGTH,
+  CodeRequiredError,
+  getStoredAccountCode,
+} from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +22,9 @@ export default function Auth() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [pin, setPin] = useState("");
   const [fullName, setFullName] = useState("");
+  const [accountCode, setAccountCode] = useState("");
+  const [needsCode, setNeedsCode] = useState(() => !getStoredAccountCode());
+  const [issuedCode, setIssuedCode] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) {
@@ -24,7 +35,7 @@ export default function Auth() {
     );
   }
 
-  if (user) return <Navigate to="/" replace />;
+  if (user && !issuedCode) return <Navigate to="/" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,15 +48,28 @@ export default function Auth() {
       });
       return;
     }
+    if (mode === "signin" && needsCode && accountCode.length !== CODE_LENGTH) {
+      toast({
+        title: "Falta el código de cuenta",
+        description: `El código tiene ${CODE_LENGTH} caracteres y se te mostró al crear la cuenta.`,
+        variant: "destructive",
+      });
+      return;
+    }
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        await signUp(normalized, fullName.trim());
-        toast({ title: "Cuenta creada", description: "Guardá tu PIN, con eso ingresás." });
+        const code = await signUp(normalized, fullName.trim());
+        if (code) setIssuedCode(code);
+        toast({ title: "Cuenta creada", description: "Guardá tu PIN y tu código de cuenta." });
       } else {
-        await signIn(normalized);
+        const code = await signIn(normalized, accountCode || undefined);
+        if (code) setIssuedCode(code);
       }
     } catch (error: any) {
+      if (error instanceof CodeRequiredError) {
+        setNeedsCode(true);
+      }
       toast({
         title: mode === "signup" ? "No se pudo crear la cuenta" : "No se pudo iniciar sesión",
         description: error?.message ?? "Intentá de nuevo",
@@ -55,6 +79,32 @@ export default function Auth() {
       setSubmitting(false);
     }
   };
+
+  if (issuedCode) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div className="w-full max-w-[420px] border border-border rounded-md p-8 space-y-6">
+          <img src={viattoLogo.url} alt="viatto" className="h-12 w-auto" />
+          <div className="space-y-2">
+            <h1 className="text-lg font-semibold">Tu código de cuenta</h1>
+            <p className="text-[13px] text-muted-foreground">
+              Anotalo. Junto con tu PIN es lo único que permite entrar desde otro dispositivo. No
+              se puede recuperar si lo perdés.
+            </p>
+          </div>
+          <div className="border border-border rounded-md py-5 text-center text-2xl font-semibold tracking-[0.25em]">
+            {issuedCode}
+          </div>
+          <Button
+            onClick={() => setIssuedCode(null)}
+            className="w-full h-11 bg-foreground text-background hover:bg-foreground/90"
+          >
+            Ya lo guardé, continuar
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
