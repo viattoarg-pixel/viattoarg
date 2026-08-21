@@ -92,15 +92,16 @@ export default function Auth() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="pin" className="text-[13px]">PIN de 4 dígitos</Label>
+            <Label htmlFor="pin" className="text-[13px]">PIN de {PIN_LENGTH} dígitos</Label>
             <Input
               id="pin"
+              type="password"
               inputMode="numeric"
               autoComplete="one-time-code"
               value={pin}
               onChange={(e) => setPin(normalizePin(e.target.value))}
-              placeholder="••••"
-              maxLength={4}
+              placeholder="••••••"
+              maxLength={PIN_LENGTH}
               className="h-14 text-center text-2xl tracking-[0.5em] font-semibold"
             />
           </div>
