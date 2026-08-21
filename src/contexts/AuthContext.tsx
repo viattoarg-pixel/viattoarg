@@ -9,8 +9,36 @@ export const PIN_LENGTH = 6;
 
 export const normalizePin = (pin: string) => pin.replace(/\D/g, "").slice(0, PIN_LENGTH);
 
-const pinToEmail = (pin: string) => `pin-${pin}@viatto.app`;
-const pinToPassword = (pin: string) => `viatto-pin-${pin}-2026`;
+const PIN_ERRORS: Record<string, string> = {
+  invalid_pin: `Ingresá un PIN de ${PIN_LENGTH} dígitos.`,
+  pin_taken: "Ese PIN ya está en uso. Probá con otro.",
+  invalid_credentials: "Ese PIN no existe. Creá una cuenta nueva.",
+  signup_failed: "No se pudo crear la cuenta. Probá con otro PIN.",
+};
+
+// El PIN se verifica en el servidor: la contraseña interna se deriva con un
+// secreto que nunca sale del backend, así no se puede calcular desde el navegador.
+const pinAuth = async (action: "signin" | "signup", pin: string, fullName?: string) => {
+  const { data, error } = await supabase.functions.invoke("pin-auth", {
+    body: { action, pin, fullName },
+  });
+
+  const code: string | undefined = (data as any)?.error;
+  if (error || code || !(data as any)?.access_token) {
+    throw new Error(
+      (code && PIN_ERRORS[code]) ||
+        (action === "signup"
+          ? "No se pudo crear la cuenta. Probá de nuevo."
+          : "No se pudo iniciar sesión. Revisá el PIN."),
+    );
+  }
+
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token: (data as any).access_token,
+    refresh_token: (data as any).refresh_token,
+  });
+  if (sessionError) throw sessionError;
+};
 
 interface AuthContextType {
   user: User | null;
