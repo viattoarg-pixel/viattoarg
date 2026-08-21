@@ -146,6 +146,26 @@ export default function Auth() {
             />
           </div>
 
+          {mode === "signin" && needsCode && (
+            <div className="space-y-2">
+              <Label htmlFor="accountCode" className="text-[13px]">
+                Código de cuenta ({CODE_LENGTH} caracteres)
+              </Label>
+              <Input
+                id="accountCode"
+                value={accountCode}
+                onChange={(e) => setAccountCode(normalizeCode(e.target.value))}
+                placeholder="Ej: K7M2QP4X"
+                maxLength={CODE_LENGTH}
+                className="h-11 text-center tracking-[0.25em] font-semibold uppercase"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Se te mostró al crear la cuenta. Este dispositivo lo recuerda para las próximas veces.
+              </p>
+            </div>
+          )}
+
+
           <Button
             type="submit"
             disabled={submitting}
