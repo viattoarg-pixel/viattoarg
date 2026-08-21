@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, Link } from "react-router-dom";
-import { useAuth, normalizePin } from "@/contexts/AuthContext";
+import { useAuth, normalizePin, PIN_LENGTH } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,10 +29,10 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const normalized = normalizePin(pin);
-    if (normalized.length !== 4) {
+    if (normalized.length !== PIN_LENGTH) {
       toast({
         title: "PIN incompleto",
-        description: "Ingresá un PIN de 4 dígitos.",
+        description: `Ingresá un PIN de ${PIN_LENGTH} dígitos.`,
         variant: "destructive",
       });
       return;
@@ -56,7 +56,7 @@ export default function Auth() {
           : /rate limit|too many requests|over_email_send/i.test(msg)
           ? "Demasiados intentos seguidos. Esperá un minuto y volvé a probar."
           : /is invalid|email_address_invalid/i.test(msg)
-          ? "Hubo un problema con ese PIN. Probá con otro de 4 dígitos."
+          ? `Hubo un problema con ese PIN. Probá con otro de ${PIN_LENGTH} dígitos.`
           : msg,
 
         variant: "destructive",
@@ -92,15 +92,16 @@ export default function Auth() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="pin" className="text-[13px]">PIN de 4 dígitos</Label>
+            <Label htmlFor="pin" className="text-[13px]">PIN de {PIN_LENGTH} dígitos</Label>
             <Input
               id="pin"
+              type="password"
               inputMode="numeric"
               autoComplete="one-time-code"
               value={pin}
               onChange={(e) => setPin(normalizePin(e.target.value))}
-              placeholder="••••"
-              maxLength={4}
+              placeholder="••••••"
+              maxLength={PIN_LENGTH}
               className="h-14 text-center text-2xl tracking-[0.5em] font-semibold"
             />
           </div>
