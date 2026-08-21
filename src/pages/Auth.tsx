@@ -29,10 +29,10 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const normalized = normalizePin(pin);
-    if (normalized.length !== 4) {
+    if (normalized.length !== PIN_LENGTH) {
       toast({
         title: "PIN incompleto",
-        description: "Ingresá un PIN de 4 dígitos.",
+        description: `Ingresá un PIN de ${PIN_LENGTH} dígitos.`,
         variant: "destructive",
       });
       return;
