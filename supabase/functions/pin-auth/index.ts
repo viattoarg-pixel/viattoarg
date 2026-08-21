@@ -18,11 +18,11 @@ const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const PEPPER = Deno.env.get("PIN_AUTH_PEPPER")!;
 
 const PIN_LENGTH = 6;
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin caracteres ambiguos
+const CODE_LENGTH = 8;
 
-// Derives the internal Supabase password from the PIN using a server-only
-// secret. Without the pepper the password cannot be reconstructed from the PIN,
-// so credentials are never guessable from the client.
-async function derivePassword(pin: string): Promise<string> {
+// HMAC con un secreto que sólo vive en el servidor.
+async function hmac(message: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(PEPPER),
@@ -30,14 +30,35 @@ async function derivePassword(pin: string): Promise<string> {
     false,
     ["sign"],
   );
-  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`viatto:pin:${pin}`));
-  const hex = Array.from(new Uint8Array(sig))
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
+  return Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
-  return `vp_${hex}`;
 }
 
-const pinToEmail = (pin: string) => `pin-${pin}@viatto.app`;
+// El PIN por sí solo no alcanza: la identidad y la contraseña internas se
+// derivan del PIN + un código de cuenta aleatorio de 8 caracteres (~1e12
+// combinaciones extra) que nunca se puede adivinar desde el cliente.
+const identity = async (pin: string, code: string) => {
+  const digest = await hmac(`viatto:id:${pin}:${code}`);
+  return `acct-${digest.slice(0, 32)}@viatto.app`;
+};
+const password = (pin: string, code: string) => hmac(`viatto:pw:${pin}:${code}`).then((h) => `vp_${h}`);
+
+// Credenciales del esquema anterior (sólo PIN) para migrar cuentas existentes.
+const legacyEmail = (pin: string) => `pin-${pin}@viatto.app`;
+const legacyPassword = (pin: string) => hmac(`viatto:pin:${pin}`).then((h) => `vp_${h}`);
+
+const generateCode = () => {
+  const bytes = new Uint8Array(CODE_LENGTH);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes)
+    .map((b) => CODE_ALPHABET[b % CODE_ALPHABET.length])
+    .join("");
+};
+
+const normalizeCode = (value: unknown) =>
+  typeof value === "string" ? value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, CODE_LENGTH) : "";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -46,15 +67,12 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const action = body?.action;
-    const rawPin = typeof body?.pin === "string" ? body.pin : "";
-    const pin = rawPin.replace(/\D/g, "");
+    const pin = (typeof body?.pin === "string" ? body.pin : "").replace(/\D/g, "");
+    const code = normalizeCode(body?.accountCode);
     const fullName = typeof body?.fullName === "string" ? body.fullName.trim().slice(0, 100) : "";
 
     if (pin.length !== PIN_LENGTH) return json({ error: "invalid_pin" }, 400);
     if (action !== "signin" && action !== "signup") return json({ error: "invalid_action" }, 400);
-
-    const email = pinToEmail(pin);
-    const password = await derivePassword(pin);
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
@@ -63,35 +81,67 @@ Deno.serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    const session = (token: { access_token: string; refresh_token: string }, accountCode?: string) =>
+      json({ access_token: token.access_token, refresh_token: token.refresh_token, accountCode });
+
     if (action === "signup") {
+      const accountCode = generateCode();
+      const email = await identity(pin, accountCode);
+      const pass = await password(pin, accountCode);
+
       const { error: createError } = await admin.auth.admin.createUser({
         email,
-        password,
+        password: pass,
         email_confirm: true,
-        user_metadata: { full_name: fullName, username: pin },
+        user_metadata: { full_name: fullName },
       });
-
       if (createError) {
-        const msg = createError.message?.toLowerCase() ?? "";
-        if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
-          return json({ error: "pin_taken" }, 409);
-        }
         console.error("pin-auth signup failed", createError.message);
         return json({ error: "signup_failed" }, 400);
       }
+
+      const { data, error } = await publicClient.auth.signInWithPassword({ email, password: pass });
+      if (error || !data.session) {
+        console.error("pin-auth signin after signup failed", error?.message);
+        return json({ error: "signup_failed" }, 400);
+      }
+      return session(data.session, accountCode);
     }
 
-    const { data, error } = await publicClient.auth.signInWithPassword({ email, password });
-    if (error || !data.session) {
-      if (action === "signin") return json({ error: "invalid_credentials" }, 401);
-      console.error("pin-auth signin after signup failed", error?.message);
-      return json({ error: "signup_failed" }, 400);
+    // signin
+    if (code.length === CODE_LENGTH) {
+      const email = await identity(pin, code);
+      const pass = await password(pin, code);
+      const { data, error } = await publicClient.auth.signInWithPassword({ email, password: pass });
+      if (error || !data.session) return json({ error: "invalid_credentials" }, 401);
+      return session(data.session);
     }
 
-    return json({
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
+    // Sin código: sólo puede entrar una cuenta del esquema anterior, y en ese
+    // caso se migra al esquema nuevo y se le entrega su código de cuenta.
+    const oldEmail = legacyEmail(pin);
+    const oldPass = await legacyPassword(pin);
+    const legacy = await publicClient.auth.signInWithPassword({ email: oldEmail, password: oldPass });
+    if (legacy.error || !legacy.data.session) {
+      return json({ error: code.length ? "invalid_code" : "code_required" }, 401);
+    }
+
+    const accountCode = generateCode();
+    const newEmail = await identity(pin, accountCode);
+    const newPass = await password(pin, accountCode);
+    const { error: updateError } = await admin.auth.admin.updateUserById(legacy.data.user!.id, {
+      email: newEmail,
+      password: newPass,
+      email_confirm: true,
     });
+    if (updateError) {
+      console.error("pin-auth migration failed", updateError.message);
+      return session(legacy.data.session);
+    }
+
+    const migrated = await publicClient.auth.signInWithPassword({ email: newEmail, password: newPass });
+    if (migrated.error || !migrated.data.session) return json({ error: "invalid_credentials" }, 401);
+    return session(migrated.data.session, accountCode);
   } catch (e) {
     console.error("pin-auth unexpected error", e instanceof Error ? e.message : e);
     return json({ error: "unexpected_error" }, 500);

@@ -6,38 +6,77 @@ import type { Tables } from "@/integrations/supabase/types";
 type Profile = Tables<"profiles">;
 
 export const PIN_LENGTH = 6;
+export const CODE_LENGTH = 8;
 
 export const normalizePin = (pin: string) => pin.replace(/\D/g, "").slice(0, PIN_LENGTH);
+export const normalizeCode = (code: string) =>
+  code.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, CODE_LENGTH);
+
+const CODE_STORAGE_KEY = "viatto.accountCode";
+
+export const getStoredAccountCode = () => {
+  try {
+    return localStorage.getItem(CODE_STORAGE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+};
+
+const storeAccountCode = (code: string) => {
+  try {
+    localStorage.setItem(CODE_STORAGE_KEY, code);
+  } catch {
+    /* almacenamiento no disponible */
+  }
+};
+
+export class CodeRequiredError extends Error {
+  constructor() {
+    super("Ingresá tu código de cuenta para entrar en este dispositivo.");
+    this.name = "CodeRequiredError";
+  }
+}
 
 const PIN_ERRORS: Record<string, string> = {
   invalid_pin: `Ingresá un PIN de ${PIN_LENGTH} dígitos.`,
-  pin_taken: "Ese PIN ya está en uso. Probá con otro.",
-  invalid_credentials: "Ese PIN no existe. Creá una cuenta nueva.",
-  signup_failed: "No se pudo crear la cuenta. Probá con otro PIN.",
+  invalid_credentials: "El PIN o el código de cuenta no coinciden.",
+  invalid_code: "El código de cuenta no coincide con ese PIN.",
+  signup_failed: "No se pudo crear la cuenta. Probá de nuevo.",
 };
 
-// El PIN se verifica en el servidor: la contraseña interna se deriva con un
-// secreto que nunca sale del backend, así no se puede calcular desde el navegador.
-const pinAuth = async (action: "signin" | "signup", pin: string, fullName?: string) => {
+// El PIN nunca alcanza por sí solo: el servidor combina el PIN con un código de
+// cuenta aleatorio y un secreto propio del backend para derivar las credenciales.
+const pinAuth = async (
+  action: "signin" | "signup",
+  pin: string,
+  opts: { fullName?: string; accountCode?: string } = {},
+): Promise<string | undefined> => {
   const { data, error } = await supabase.functions.invoke("pin-auth", {
-    body: { action, pin, fullName },
+    body: { action, pin, fullName: opts.fullName, accountCode: opts.accountCode },
   });
 
   const code: string | undefined = (data as any)?.error;
+  if (code === "code_required") throw new CodeRequiredError();
   if (error || code || !(data as any)?.access_token) {
     throw new Error(
       (code && PIN_ERRORS[code]) ||
         (action === "signup"
           ? "No se pudo crear la cuenta. Probá de nuevo."
-          : "No se pudo iniciar sesión. Revisá el PIN."),
+          : "No se pudo iniciar sesión. Revisá los datos."),
     );
   }
+
+  const accountCode: string | undefined = (data as any).accountCode;
+  if (accountCode) storeAccountCode(accountCode);
+  else if (opts.accountCode) storeAccountCode(opts.accountCode);
 
   const { error: sessionError } = await supabase.auth.setSession({
     access_token: (data as any).access_token,
     refresh_token: (data as any).refresh_token,
   });
   if (sessionError) throw sessionError;
+
+  return accountCode;
 };
 
 interface AuthContextType {
@@ -45,8 +84,8 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (pin: string, fullName: string) => Promise<void>;
-  signIn: (pin: string) => Promise<void>;
+  signUp: (pin: string, fullName: string) => Promise<string | undefined>;
+  signIn: (pin: string, accountCode?: string) => Promise<string | undefined>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -94,13 +133,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (pin: string, fullName: string) => {
-    await pinAuth("signup", pin, fullName);
-  };
+  const signUp = (pin: string, fullName: string) => pinAuth("signup", pin, { fullName });
 
-  const signIn = async (pin: string) => {
-    await pinAuth("signin", pin);
-  };
+  const signIn = (pin: string, accountCode?: string) =>
+    pinAuth("signin", pin, { accountCode: accountCode ?? getStoredAccountCode() });
 
 
   const signOut = async () => {
