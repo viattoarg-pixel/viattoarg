@@ -1,7 +1,6 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "./format";
-import logoAsset from "@/assets/viatto-logo-official.png";
 
 export type PdfExpense = {
   id: string;
@@ -22,26 +21,6 @@ export type PdfUser = {
   full_name?: string | null;
   email?: string | null;
 };
-
-// Cache the logo data URL so it loads only once
-let logoCache: string | null = null;
-async function getLogoDataUrl(): Promise<string | null> {
-  if (logoCache) return logoCache;
-  try {
-    const res = await fetch(logoAsset);
-    const blob = await res.blob();
-    const dataUrl: string = await new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result as string);
-      r.onerror = reject;
-      r.readAsDataURL(blob);
-    });
-    logoCache = dataUrl;
-    return dataUrl;
-  } catch {
-    return null;
-  }
-}
 
 async function loadReceiptImage(path: string): Promise<{ dataUrl: string; ext: string } | null> {
   try {
@@ -68,13 +47,11 @@ const PAGE_H = 297;
 const MARGIN = 16;
 
 async function drawHeader(doc: jsPDF, title: string, subtitle?: string) {
-  // Top white header band with logo + brand
-  const logo = await getLogoDataUrl();
-  if (logo) {
-    try {
-      doc.addImage(logo, "PNG", MARGIN, 12, 28, 10);
-    } catch { /* noop */ }
-  }
+  // Typographic wordmark (dark green serif)
+  doc.setFont("times", "normal");
+  doc.setFontSize(24);
+  doc.setTextColor(28, 64, 48);
+  doc.text("viatto", MARGIN, 21);
 
   // Title block
   doc.setTextColor(20, 30, 45);
