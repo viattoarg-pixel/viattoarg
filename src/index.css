@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -69,6 +70,7 @@
     --severity-low: 80 30% 38%;
 
     /* Premium tokens */
+    --brand-green: 158 40% 18%;
     --brand-olive: 80 23% 38%;
     --brand-petrol: 190 39% 29%;
     --brand-navy: 217 33% 17%;
@@ -136,6 +138,7 @@
     --sidebar-border: 217 25% 18%;
     --sidebar-ring: 190 50% 50%;
 
+    --brand-green: 150 35% 72%;
     --gradient-brand: linear-gradient(135deg, hsl(80 35% 45%) 0%, hsl(190 50% 38%) 100%);
     --gradient-soft: linear-gradient(135deg, hsl(80 35% 55% / 0.10) 0%, hsl(190 50% 45% / 0.10) 100%);
     --gradient-hero: radial-gradient(at 20% 20%, hsl(80 35% 45% / 0.18), transparent 50%),
@@ -194,5 +197,13 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+  .brand-wordmark {
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: hsl(var(--brand-green));
+    display: inline-block;
+    text-transform: lowercase;
   }
 }
