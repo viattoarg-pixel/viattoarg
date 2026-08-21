@@ -195,4 +195,12 @@
     background-clip: text;
     color: transparent;
   }
+  .brand-wordmark {
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: hsl(var(--brand-green));
+    display: inline-block;
+    text-transform: lowercase;
+  }
 }
