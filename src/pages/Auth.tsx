@@ -56,7 +56,7 @@ export default function Auth() {
           : /rate limit|too many requests|over_email_send/i.test(msg)
           ? "Demasiados intentos seguidos. Esperá un minuto y volvé a probar."
           : /is invalid|email_address_invalid/i.test(msg)
-          ? "Hubo un problema con ese PIN. Probá con otro de 4 dígitos."
+          ? `Hubo un problema con ese PIN. Probá con otro de ${PIN_LENGTH} dígitos.`
           : msg,
 
         variant: "destructive",
