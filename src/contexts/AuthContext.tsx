@@ -30,9 +30,17 @@ const storeAccountCode = (code: string) => {
   }
 };
 
+export const clearStoredAccountCode = () => {
+  try {
+    localStorage.removeItem(CODE_STORAGE_KEY);
+  } catch {
+    /* almacenamiento no disponible */
+  }
+};
+
 export class CodeRequiredError extends Error {
-  constructor() {
-    super("Ingresá tu código de cuenta para entrar en este dispositivo.");
+  constructor(message = "Ingresá tu código de cuenta para entrar en este dispositivo.") {
+    super(message);
     this.name = "CodeRequiredError";
   }
 }
@@ -135,8 +143,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = (pin: string, fullName: string) => pinAuth("signup", pin, { fullName });
 
-  const signIn = (pin: string, accountCode?: string) =>
-    pinAuth("signin", pin, { accountCode: accountCode ?? getStoredAccountCode() });
+  const signIn = async (pin: string, accountCode?: string) => {
+    const usedStored = !accountCode;
+    const code = accountCode ?? getStoredAccountCode();
+    try {
+      return await pinAuth("signin", pin, { accountCode: code });
+    } catch (error) {
+      // Si el código guardado en este dispositivo pertenece a otra cuenta/PIN,
+      // lo descartamos y pedimos el código correcto en lugar de fallar en loop.
+      if (usedStored && code && !(error instanceof CodeRequiredError)) {
+        clearStoredAccountCode();
+        throw new CodeRequiredError(
+          "El código guardado en este dispositivo no coincide con ese PIN. Ingresá tu código de cuenta.",
+        );
+      }
+      throw error;
+    }
+  };
 
 
   const signOut = async () => {

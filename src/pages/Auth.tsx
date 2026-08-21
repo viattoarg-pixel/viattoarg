@@ -146,6 +146,16 @@ export default function Auth() {
             />
           </div>
 
+          {mode === "signin" && !needsCode && (
+            <button
+              type="button"
+              onClick={() => setNeedsCode(true)}
+              className="text-[12px] text-muted-foreground underline underline-offset-2"
+            >
+              Usar otro código de cuenta
+            </button>
+          )}
+
           {mode === "signin" && needsCode && (
             <div className="space-y-2">
               <Label htmlFor="accountCode" className="text-[13px]">
