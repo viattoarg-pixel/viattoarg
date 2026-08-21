@@ -133,13 +133,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (pin: string, fullName: string) => {
-    await pinAuth("signup", pin, fullName);
-  };
+  const signUp = (pin: string, fullName: string) => pinAuth("signup", pin, { fullName });
 
-  const signIn = async (pin: string) => {
-    await pinAuth("signin", pin);
-  };
+  const signIn = (pin: string, accountCode?: string) =>
+    pinAuth("signin", pin, { accountCode: accountCode ?? getStoredAccountCode() });
 
 
   const signOut = async () => {
