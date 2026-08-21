@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDate } from "./format";
-import logoAsset from "@/assets/viatto-logo-official.png.asset.json";
+import logoAsset from "@/assets/viatto-logo-official.png";
 
 export type PdfExpense = {
   id: string;
@@ -28,7 +28,7 @@ let logoCache: string | null = null;
 async function getLogoDataUrl(): Promise<string | null> {
   if (logoCache) return logoCache;
   try {
-    const res = await fetch(logoAsset.url);
+    const res = await fetch(logoAsset);
     const blob = await res.blob();
     const dataUrl: string = await new Promise((resolve, reject) => {
       const r = new FileReader();
