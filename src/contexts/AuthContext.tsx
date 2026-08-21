@@ -5,7 +5,9 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
 
-export const normalizePin = (pin: string) => pin.replace(/\D/g, "").slice(0, 4);
+export const PIN_LENGTH = 6;
+
+export const normalizePin = (pin: string) => pin.replace(/\D/g, "").slice(0, PIN_LENGTH);
 
 const pinToEmail = (pin: string) => `pin-${pin}@viatto.app`;
 const pinToPassword = (pin: string) => `viatto-pin-${pin}-2026`;
