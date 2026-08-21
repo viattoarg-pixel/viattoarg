@@ -46,19 +46,9 @@ export default function Auth() {
         await signIn(normalized);
       }
     } catch (error: any) {
-      const msg: string = error?.message ?? "Intentá de nuevo";
       toast({
         title: mode === "signup" ? "No se pudo crear la cuenta" : "No se pudo iniciar sesión",
-        description: /invalid login credentials/i.test(msg)
-          ? "Ese PIN no existe. Creá una cuenta nueva."
-          : /already registered|already exists|user_already/i.test(msg)
-          ? "Ese PIN ya está en uso. Probá con otro."
-          : /rate limit|too many requests|over_email_send/i.test(msg)
-          ? "Demasiados intentos seguidos. Esperá un minuto y volvé a probar."
-          : /is invalid|email_address_invalid/i.test(msg)
-          ? `Hubo un problema con ese PIN. Probá con otro de ${PIN_LENGTH} dígitos.`
-          : msg,
-
+        description: error?.message ?? "Intentá de nuevo",
         variant: "destructive",
       });
     } finally {
