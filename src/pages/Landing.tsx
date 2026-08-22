@@ -225,7 +225,11 @@ const Landing = () => {
             <StackedLogo size={16} />
             <span>.</span>
           </div>
-          <Link to="/auth" className="hover:text-foreground">Ingresar</Link>
+          <div className="flex items-center gap-4">
+            <a href="mailto:viattoarg@gmail.com" className="hover:text-foreground">Contacto</a>
+            <Link to="/soporte" className="hover:text-foreground">Donaciones</Link>
+            <Link to="/auth" className="hover:text-foreground">Ingresar</Link>
+          </div>
         </div>
       </footer>
     </div>
