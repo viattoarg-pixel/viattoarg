@@ -77,22 +77,16 @@ export default function Support() {
 
     setSending(true);
     const { data: userRes } = await supabase.auth.getUser();
-    const { error } = await supabase.from("contact_messages").insert({
+    await supabase.from("contact_messages").insert({
       name: parsed.data.name,
       message: parsed.data.message,
       user_id: userRes.user?.id ?? null,
     });
     setSending(false);
-
-    if (error) {
-      toast({ title: "No se pudo enviar", description: error.message, variant: "destructive" });
-      return;
-    }
-
     setSent(true);
-    setMessage("");
-    toast({ title: "¡Gracias!", description: "Recibimos tu mensaje." });
+    window.location.href = mailtoHref;
   };
+
 
   return (
     <AppLayout>
