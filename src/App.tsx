@@ -14,6 +14,7 @@ import Expenses from "./pages/Expenses";
 import ExpenseForm from "./pages/ExpenseForm";
 import Categories from "./pages/Categories";
 import Settings from "./pages/Settings";
+import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/expenses/:id" element={<ProtectedRoute><ExpenseForm /></ProtectedRoute>} />
               <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/soporte" element={<ProtectedRoute><Support /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
