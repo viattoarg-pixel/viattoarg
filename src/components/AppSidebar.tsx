@@ -1,4 +1,4 @@
-import { LayoutDashboard, Wallet, Receipt, Plus, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Wallet, Receipt, Plus, Settings, LogOut, MessageSquare } from "lucide-react";
 import { StackedLogo } from "./StackedLogo";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ export const navItems = [
   { icon: Plus, label: "Nuevo gasto", path: "/expenses/new" },
   { icon: Receipt, label: "Gastos", path: "/expenses" },
   { icon: Wallet, label: "Presupuestos", path: "/budgets" },
+  { icon: MessageSquare, label: "Contacto y donaciones", path: "/soporte" },
   { icon: Settings, label: "Ajustes", path: "/settings" },
 ];
 

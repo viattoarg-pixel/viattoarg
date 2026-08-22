@@ -47,6 +47,30 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       expense_categories: {
         Row: {
           color: string
