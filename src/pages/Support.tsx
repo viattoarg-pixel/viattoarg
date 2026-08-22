@@ -77,22 +77,16 @@ export default function Support() {
 
     setSending(true);
     const { data: userRes } = await supabase.auth.getUser();
-    const { error } = await supabase.from("contact_messages").insert({
+    await supabase.from("contact_messages").insert({
       name: parsed.data.name,
       message: parsed.data.message,
       user_id: userRes.user?.id ?? null,
     });
     setSending(false);
-
-    if (error) {
-      toast({ title: "No se pudo enviar", description: error.message, variant: "destructive" });
-      return;
-    }
-
     setSent(true);
-    setMessage("");
-    toast({ title: "¡Gracias!", description: "Recibimos tu mensaje." });
+    window.location.href = mailtoHref;
   };
+
 
   return (
     <AppLayout>
@@ -139,21 +133,15 @@ export default function Support() {
                     placeholder="Contanos tu duda, sugerencia o comentario…"
                   />
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button type="submit" disabled={sending} className="gap-1.5">
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    Enviar mensaje
-                  </Button>
-                  <Button asChild type="button" variant="outline" className="gap-1.5">
-                    <a href={mailtoHref}>Enviar por correo</a>
-                  </Button>
-                </div>
-                {sent && (
-                  <p className="text-[12px] text-muted-foreground">
-                    Mensaje recibido. También podés escribirnos directo a{" "}
-                    <a className="underline" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
-                  </p>
-                )}
+                <Button type="submit" disabled={sending} className="gap-1.5 w-full sm:w-auto">
+                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Enviar por correo
+                </Button>
+                <p className="text-[12px] text-muted-foreground">
+                  Se abre tu app de correo con el mensaje ya escrito para {" "}
+                  <a className="underline" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+                </p>
+
               </form>
             </section>
 
