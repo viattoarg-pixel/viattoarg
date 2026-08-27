@@ -1,8 +1,9 @@
-import { LayoutDashboard, Wallet, Receipt, Plus, Settings, LogOut, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Wallet, Receipt, Plus, Settings, LogOut, MessageSquare, ShieldCheck } from "lucide-react";
 import { StackedLogo } from "./StackedLogo";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,11 @@ export const navItems = [
 export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
   const location = useLocation();
   const { profile, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const items = isAdmin
+    ? [...navItems, { icon: ShieldCheck, label: "Administración", path: "/admin" }]
+    : navItems;
+
 
   const initials = profile?.full_name
     ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
@@ -28,7 +34,7 @@ export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: 
     <>
 
       <nav className="flex-1 py-1.5 px-1.5 space-y-px">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const isActive = location.pathname === item.path ||
             (item.path !== "/" && item.path !== "/expenses/new" && location.pathname.startsWith(item.path));
           return (
