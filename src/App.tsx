@@ -15,6 +15,7 @@ import ExpenseForm from "./pages/ExpenseForm";
 import Categories from "./pages/Categories";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
