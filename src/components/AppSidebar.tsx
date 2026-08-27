@@ -20,6 +20,11 @@ export const navItems = [
 export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
   const location = useLocation();
   const { profile, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
+  const items = isAdmin
+    ? [...navItems, { icon: ShieldCheck, label: "Administración", path: "/admin" }]
+    : navItems;
+
 
   const initials = profile?.full_name
     ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
