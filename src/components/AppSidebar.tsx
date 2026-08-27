@@ -1,8 +1,9 @@
-import { LayoutDashboard, Wallet, Receipt, Plus, Settings, LogOut, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Wallet, Receipt, Plus, Settings, LogOut, MessageSquare, ShieldCheck } from "lucide-react";
 import { StackedLogo } from "./StackedLogo";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
