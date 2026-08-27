@@ -34,7 +34,7 @@ export function SidebarContent({ collapsed = false, onNavigate }: { collapsed?: 
     <>
 
       <nav className="flex-1 py-1.5 px-1.5 space-y-px">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const isActive = location.pathname === item.path ||
             (item.path !== "/" && item.path !== "/expenses/new" && location.pathname.startsWith(item.path));
           return (
